@@ -1,6 +1,6 @@
 """Generate script for creating training data from AMASS
-python data/prepare_data.py --raw_data /BS/humanpose/static00/data/PoseNDF_raw/smpl_h --out_path /BS/humanpose/static00/data/PoseNDF_train/smpl_h --bash_file ./traindata.sh --use_slrum
-python data/prepare_data.py --raw_data <path_for_samples_amass_poses> --out_path <path_for_training_data> --bash_file ./traindata.sh 
+python data/prepare_data.py --sampled_data /BS/humanpose/static00/data/PoseNDF_raw/smpl_h --out_path /BS/humanpose/static00/data/PoseNDF_train/smpl_h --bash_file ./traindata.sh --use_slrum
+python data/prepare_data.py --sampled_data <path_for_samples_amass_poses> --out_path <path_for_training_data> --bash_file ./traindata.sh 
  
  Intrsuctions for running the code:
  Please change L24:L30, if you are using slurm """
@@ -39,7 +39,7 @@ def main(args):
         count = 1
         out_dir = args.out_path
         for amass_data in amass_datas:
-            ds_dir = os.path.join(args.raw_data,amass_data)
+            ds_dir = os.path.join(args.sampled_data,amass_data)
             seqs = sorted(os.listdir(ds_dir))
             for seq in seqs:
                 if  os.path.exists(os.path.join(out_dir, amass_data, seq)):
@@ -70,11 +70,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script for creating PoseNDF dataset")
 
     # Paths to output files
-    parser.add_argument("-rd", "--raw_data", type=str, default="/BS/humanpose/static00/data/PoseNDF_raw/smpl_h2",
+    parser.add_argument("-sd", "--sampled_data", type=str, default="./amass_samples",
                         help="Path to the sampled poses from AMASS")
-    parser.add_argument("-op", "--out_path", type=str, default="/BS/humanpose/static00/data/PoseNDF_train/smpl_h_small",
-                        help="Path to the resulting datafolder(storing dataset)")
-    parser.add_argument("-bf", "--bash_file", type=str, default="./tmp.sh",
+    parser.add_argument("-op", "--out_path", type=str, default="./training_data",
+                        help="Path to the resulting datafolder (storing dataset)")
+    parser.add_argument("-bf", "--bash_file", type=str, default="./train_data.sh",
                         help="Path to the bash script file")
     parser.add_argument('-sl', '--use_slurm',  action="store_true", help="Using slurm for creating dataset")
     arguments = parser.parse_args()

@@ -49,9 +49,21 @@ Why the following sentence was here in the original repo?
 
 #### 2.2 Create a script for generating training data:
 
-    python -m data.prepare_data --raw_data <path_for_samples_amass_poses> --out_path <path_for_training_data> --bash_file ./traindata.sh 
+In this step a bash script `train_data.sh` for training data generation is created in the project root directory.
 
-If you are using slurm then add "--use_slurm" and change please change the path on environment and machine specs in L24:L30 in data/prepare_data.py
+    python -m data.prepare_data
+
+By default, the input data is assumed to be in the `./amass_samples` directory (default value from the previous step) and the generated training data will be stored in `./training_data`.
+
+One can change the default behaviour by providing additional arguments:
+
+ - `--sampled_data <sampled_amass_poses_dir>` to specify the directory with the samples generated in the previous step
+ - `--out_path <path_for_training_data>` to specify the directory were the training data should be stored 
+ - `--bash_file <bash_file_name>` to use a different name for the generated bash script 
+
+TODO:
+Deal with these instructions about using slurm:
+ - If you are using slurm then add "--use_slurm" and change the path on environment and machine specs in L24:L30 in data/prepare_data.py
 
 #### 2.3 Create  training data :
     ./traindata.sh 
