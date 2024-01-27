@@ -65,7 +65,7 @@ class PoseData(Dataset):
     def __getitem__(self, idx):
 
 
-        seq_pose = np.load(self.path)['pose_body'].astype(np.float32)[:, :63]
+        seq_pose = np.load(self.path)['poses'].astype(np.float32)[:, :63]
         seq_pose = seq_pose.reshape(len(seq_pose), 21, 3)
         # change axis angle to quaternion
         quat_pose = axis_angle_to_quaternion_np(seq_pose)
@@ -113,7 +113,7 @@ class AmassData(Dataset):
         self.num_workers = num_workers
         self.device=device
 
-        self.poses =np.load(self.path)['pose_body'].astype(np.float32)
+        self.poses =np.load(self.path)['poses'].astype(np.float32)
 
 
     def __len__(self):
@@ -159,7 +159,7 @@ def sample_poses(root_dir, mode='train'):
             data = np.memmap(os.path.join(ds_dir, seq))
             tmp+= data.size
             print('cumulative....', tmp)
-            data_val = np.load(os.path.join(ds_dir, seq))['pose_body']
+            data_val = np.load(os.path.join(ds_dir, seq))['poses']
             all_pose.extend(data_val.reshape(len(data_val), 21, 3))
     print('total size....', tmp)
     data_all = np.array(all_pose)

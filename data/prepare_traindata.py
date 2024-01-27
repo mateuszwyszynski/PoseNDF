@@ -75,7 +75,7 @@ def faiss_idx_np(amass_datas, root_dir,  device='cuda:0'):
         for seq in seqs:
             if not 'npz' in seq:
                 continue
-            pose_seq = np.load(os.path.join(ds_dir, seq))['pose_body'][:, :63]
+            pose_seq = np.load(os.path.join(ds_dir, seq))['poses'][:, :63]
             pose_seq = torch.from_numpy(pose_seq.reshape(len(pose_seq), 21, 3))
             pose_seq = axis_angle_to_quaternion(pose_seq).detach().numpy()
             pose_seq, _ = quat_flip(pose_seq)  
@@ -104,7 +104,7 @@ def faiss_idx_torch(amass_datas, root_dir):
             # data = np.memmap(os.path.join(ds_dir, seq))
             # tmp+= data.size
             # print('cumulative....', tmp)
-            data_val = np.load(os.path.join(ds_dir, seq))['pose_body']
+            data_val = np.load(os.path.join(ds_dir, seq))['poses']
             pose_pt = torch.from_numpy(data_val.reshape(len(data_val), 21, 3))
             # data_val = axis_angle_to_quaternion(pose_pt).detach().numpy()
             data_val = axis_angle_to_quaternion(pose_pt)
