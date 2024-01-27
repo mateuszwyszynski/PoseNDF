@@ -23,10 +23,29 @@ Please follow [INSTALL.md](INSTALL.md)
 
 
 #### 2.1 Sample poses from AMASS:
-    python data/sample_poses.py --sampled_pose_dir <path_for_samples_amass_poses> --amass_dir <amass_dataset_dir>
+This is the data preparation step based on
+[VPoser data preparation](https://github.com/nghorbani/human_body_prior/tree/master/src/human_body_prior/data).
 
+    python -m data.sample_poses
 
-sample_poses.py is based on [VPoser data preparation](https://github.com/nghorbani/human_body_prior/tree/master/src/human_body_prior/data). If you already have this processed data, you can directly use it. You just need to convert .pt file to .npz file. 
+By default, the raw AMASS data is assumed to be in the `./amass_raw` directory and the output is stored in `./amass_samples`.
+One can change this behavious by providing additional arguments. Use:
+
+ - `--amass_dir <amass_raw_dir>` to specify directory with raw AMASS data
+ - `--sampled_pose_dir <output_dir>` to specify output directory
+
+Note that by default the script processes only the datasets from the `test` split.
+Hence, to process all splits one has to run it three times and each time set an appropriate mode in the last line:
+
+```python
+prepare_vposer_datasets(posendf_data_dir, amass_splits, amass_dir, mode='train')
+```
+
+If you already have the data processed, you can skip this step.
+
+TODO:
+Why the following sentence was here in the original repo?
+ - You just need to convert .pt file to .npz file.
 
 #### 2.2 Create script for generating training data :
     python data/prepare_data.py --raw_data <path_for_samples_amass_poses> --out_path <path_for_training_data> --bash_file ./traindata.sh 
