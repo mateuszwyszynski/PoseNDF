@@ -47,8 +47,9 @@ TODO:
 Why the following sentence was here in the original repo?
  - You just need to convert .pt file to .npz file.
 
-#### 2.2 Create script for generating training data :
-    python data/prepare_data.py --raw_data <path_for_samples_amass_poses> --out_path <path_for_training_data> --bash_file ./traindata.sh 
+#### 2.2 Create a script for generating training data:
+
+    python -m data.prepare_data --raw_data <path_for_samples_amass_poses> --out_path <path_for_training_data> --bash_file ./traindata.sh 
 
 If you are using slurm then add "--use_slurm" and change please change the path on environment and machine specs in L24:L30 in data/prepare_data.py
 

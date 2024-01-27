@@ -11,7 +11,7 @@ import os
 import numpy as np
 import ipdb
 
-from data_splits import amass_splits
+from data.data_splits import amass_splits
 
 def main(args):
     bash_path = args.bash_file
