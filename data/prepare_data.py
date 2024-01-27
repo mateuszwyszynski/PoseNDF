@@ -52,7 +52,7 @@ def main(args):
                     fp.write("\t {})".format(count) + "\n")
                     fp.write("\t\t\t")
                 fp.write(
-                    "python data/prepare_traindata.py --seq_file {}/{} --runs {} --out_dir {}".format(amass_data, seq, 1, out_dir))
+                    "python data/prepare_traindata.py --seq_file '{}/{}' --runs {} --out_dir {}".format(amass_data, seq, 1, out_dir))
               
                 count += 1
                 if args.use_slurm:
