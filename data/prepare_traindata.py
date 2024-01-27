@@ -199,10 +199,10 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Preparing pose and distance paired data for training PoseNDF")
 
-    parser.add_argument("-rd", "--raw_data", type=str, default="/BS/humanpose/static00/data/PoseNDF_raw/smpl_h2",
+    parser.add_argument("-rd", "--raw_data", type=str, default="./amass_raw",
                         help="Path to the resulting image")
     parser.add_argument("-od", "--out_dir", type=str,
-                        default="/BS/humanpose/static00/data/PoseNDF_train/smpl_h_flips",
+                        default="./training_data",
                         help="Path to the resulting image")
     parser.add_argument("-m", "--metric", type=str,
                         default='geo',
