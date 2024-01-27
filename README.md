@@ -66,11 +66,14 @@ Deal with these instructions about using slurm:
  - If you are using slurm then add "--use_slurm" and change the path on environment and machine specs in L24:L30 in data/prepare_data.py
 
 #### 2.3 Create  training data :
-    ./traindata.sh 
+Run the bash script (if needed change to your shell):
 
+    bash train_data.sh
 
-During training the dataloader reads file form data_dir/. You can now delete the amass_raw directory. 
-For all our experiments, we use the same settings as used in VPoser data preparation step.
+TODO:
+Clarify these instructions:
+ - During training the dataloader reads file form data_dir/. You can now delete the amass_raw directory. 
+ - For all our experiments, we use the same settings as used in VPoser data preparation step.
 
 #### 3. Edit configs/<>.yaml for different experimental setup
     experiment:
