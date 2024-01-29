@@ -1,5 +1,5 @@
 data:
-  data_dir: ./posendf_data/ # Training data directory
+  data_dir: ./training_data/ # Training data directory
   amass_dir: ./amass_samples/
   num_pts: 5000
   single: False
