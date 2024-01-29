@@ -64,12 +64,12 @@ class PoseData(Dataset):
         #amass_pose_data = np.load(self.amass_files[amass_idx[0]])
         amass_pose_data = np.load(self.amass_files[idx])   #for debugging
         # sample poses from this file 
-        subsample_indices = np.random.randint(0, len(amass_pose_data['pose']), self.num_pts)
-        amass_poses = amass_pose_data['pose'][subsample_indices]
+        subsample_indices = np.random.randint(0, len(amass_pose_data['pose_body']), self.num_pts)
+        amass_poses = amass_pose_data['pose_body'][subsample_indices, 6:69]
 
         if self.flip:
             amass_poses, _  = quat_flip(amass_poses)
-        amass_poses = amass_poses/np.linalg.norm(amass_poses,axis=2)[...,None]
+        amass_poses = amass_poses/np.linalg.norm(amass_poses,axis=1)[...,None]
 
         # normalise the data here
         # assert not np.any(np.isnan(poses))
