@@ -31,7 +31,7 @@ model:
     num_parts: 21
     num_layers: 5
     ff_enc: False
-    dims: [ 256, 512, 1024, 512, 256, 64 ]
+    dims: 256, 512, 1024, 512, 256, 64
     act: lrelu
     beta: 100
   StrEnc:
