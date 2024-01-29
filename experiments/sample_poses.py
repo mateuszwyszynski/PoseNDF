@@ -11,8 +11,8 @@ from data.data_splits import amass_splits
 import ipdb
 import torch
 import numpy as np
-from body_model import BodyModel
-from exp_utils import renderer, quat_flip
+from experiments.body_model import BodyModel
+from experiments.exp_utils import renderer, quat_flip
 
 from pytorch3d.transforms import axis_angle_to_quaternion, axis_angle_to_matrix, matrix_to_quaternion, quaternion_to_axis_angle
 from tqdm import tqdm
