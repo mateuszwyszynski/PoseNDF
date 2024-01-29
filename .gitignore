@@ -14,3 +14,4 @@ experiments/scripts/*
 experiments/motion_denoise_second.py
 amass_raw/
 amass_samples/
+training_data/
