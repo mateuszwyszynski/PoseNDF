@@ -1,6 +1,9 @@
 data:
   data_dir: ./posendf_data/ # Training data directory
   amass_dir: ./amass_samples/
+  num_pts: 5000
+  single: False
+  flip: False
   sample_pt: 100000
   dc: dc
 #  sample_distribution: [0.4, 0.2, 0.1, 0.1,  0.1, 0.1] #, 0.025, 0.05, 0.05, 0.05]
