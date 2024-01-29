@@ -14,7 +14,7 @@ data:
   sample_sigmas: [ 0.0, 0.001]
 experiment:
   bodymodel: smpl
-  root_dir: /BS/humanpose/static00/pose_manifold/amass # Where to save checkpoints and final trained model_quat #todo
+  root_dir: ./posendf/exp1/ # Where to save checkpoints and final trained model_quat #todo
   data_name: PoseData
   type: BaseTrainer
   inp_name: xyz
