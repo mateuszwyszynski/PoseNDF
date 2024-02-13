@@ -116,7 +116,7 @@ def sample_pose(opt, ckpt, motion_file=None,gt_data=None, out_path=None):
         noisy_pose = torch.rand((batch_size,21,4))
         noisy_pose = torch.nn.functional.normalize(noisy_pose,dim=2).to(device=device)
     else:
-        noisy_pose = np.load(motion_file)['pose']
+        noisy_pose = np.load(motion_file)['pose_body']
         #randomly slect according to batch size
         subsample_indices = np.random.randint(0, len(noisy_pose), batch_size)
         noisy_pose = noisy_pose[subsample_indices]
