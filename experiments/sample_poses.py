@@ -123,7 +123,7 @@ def sample_pose(opt, ckpt, motion_file=None,gt_data=None, out_path=None):
         #apply flip
         noisy_pose = torch.from_numpy(noisy_pose.astype(np.float32)).to(device=device)
     #  load body model
-    bm_dir_path = '/BS/garvita/work/SMPL_data/models/smpl'
+    bm_dir_path = 'smpl/models'
     body_model = BodyModel(bm_path=bm_dir_path, model_type='smpl', batch_size=batch_size,  num_betas=10).to(device=device)
 
     # create Motion denoiser layer
