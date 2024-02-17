@@ -1,7 +1,10 @@
 name: posendf
 channels:
+  - pytorch3d
+  - pytorch
   - defaults
   - conda-forge
+  - bottler
 dependencies:
   - python=3.9
   - cudatoolkit=11.3
