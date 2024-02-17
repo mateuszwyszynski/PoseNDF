@@ -73,3 +73,5 @@ if __name__ == "__main__":
     amass_dir = args.amass_dir
     
     prepare_vposer_datasets(posendf_data_dir, amass_splits, amass_dir, mode='test')
+    prepare_vposer_datasets(posendf_data_dir, amass_splits, amass_dir, mode='train')
+    prepare_vposer_datasets(posendf_data_dir, amass_splits, amass_dir, mode='vald')

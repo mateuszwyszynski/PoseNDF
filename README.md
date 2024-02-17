@@ -25,6 +25,7 @@ Please follow [INSTALL.md](INSTALL.md)
 #### 2.1 Sample poses from AMASS:
 This is the data preparation step based on
 [VPoser data preparation](https://github.com/nghorbani/human_body_prior/tree/master/src/human_body_prior/data).
+If you already have the data processed, you can skip this step.
 
     python -m data.sample_poses
 
@@ -34,14 +35,7 @@ One can change this behavious by providing additional arguments. Use:
  - `--amass_dir <amass_raw_dir>` to specify directory with raw AMASS data
  - `--sampled_pose_dir <output_dir>` to specify output directory
 
-Note that by default the script processes only the datasets from the `test` split.
-Hence, to process all splits one has to run it three times and each time set an appropriate mode in the last line:
-
-```python
-prepare_vposer_datasets(posendf_data_dir, amass_splits, amass_dir, mode='train')
-```
-
-If you already have the data processed, you can skip this step.
+If you would like to use only a subset of data from AMASS, you should change the predefined variable `amass_splits` in the `data/data_splits.py` script.
 
 TODO:
 Why the following sentence was here in the original repo?
