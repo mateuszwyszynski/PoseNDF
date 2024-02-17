@@ -136,10 +136,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Interpolate using PoseNDF.'
     )
-    parser.add_argument('--config', '-c', default='/BS/humanpose/static00/pose_manifold/amass_flip_test/flip_small_softplus_l1_1e-05__10000_dist0.5_eik0_man0.1/config.yaml', type=str, help='Path to config file.')
-    parser.add_argument('--ckpt_path', '-ckpt', default='/BS/humanpose/static00/pose_manifold/amass_flip_test/flip_small_softplus_l1_1e-05__10000_dist0.5_eik0_man0.1/checkpoints/checkpoint_epoch_best.tar', type=str, help='Path to pretrained model.')
+    parser.add_argument('--config', '-c', default='configs/amass.yaml', type=str, help='Path to config file.')
+    parser.add_argument('--ckpt_path', '-ckpt', default='posendf/version2/checkpoint_epoch_best.tar', type=str, help='Path to pretrained model.')
     parser.add_argument('--noisy_pose', '-np', nargs='?', type=str, const='training_data/ACCAD/Female1General_c3d.npz', help='Path to noisy motion file')
-    parser.add_argument('--outpath_folder', '-out', default='/BS/humanpose/static00/data/PoseNDF_exp/sampled_poses_bad', type=str, help='Path to output')
+    parser.add_argument('--outpath_folder', '-out', default='posendf/version2', type=str, help='Path to output')
     args = parser.parse_args()
 
     opt = load_config(args.config)
