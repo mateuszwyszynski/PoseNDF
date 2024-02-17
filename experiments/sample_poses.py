@@ -136,7 +136,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Interpolate using PoseNDF.'
     )
-    parser.add_argument('--config', '-c', default='configs/amass.yaml', type=str, help='Path to config file.')
+    parser.add_argument('--config', '-c', default='posendf/version2/config.yaml', type=str, help='Path to config file.')
     parser.add_argument('--ckpt_path', '-ckpt', default='posendf/version2/checkpoint_epoch_best.tar', type=str, help='Path to pretrained model.')
     parser.add_argument('--noisy_pose', '-np', nargs='?', type=str, const='training_data/ACCAD/Female1General_c3d.npz', help='Path to noisy motion file')
     parser.add_argument('--outpath_folder', '-out', default='posendf/version2', type=str, help='Path to output')
