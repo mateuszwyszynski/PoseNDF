@@ -164,3 +164,11 @@ Both image and corresponding keypoint should be in same directory with <image_na
         year = {2022},
         }
 
+### Troubleshooting
+
+ - if you get an import error when using `pytorch3d`
+ (e.g. `libtorch_cuda_cu.so` cannot be found when calling `from pytorch3d import _C` or `from pytorch3d import renderer`)
+ then I recommend to check if `pytorch3d` can be installed in a fresh environment.
+ This might lead you to the cause of the problem.
+ I have encountered such errors when running the code on GCP and managed to go around it by switching to a fresh VM with a more recent CUDA version.
+ So I believe that in the end the problem was caused by some problems with installing `pytorch3d` with the CUDA setup from the other machine.
