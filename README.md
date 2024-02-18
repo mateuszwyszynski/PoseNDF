@@ -136,6 +136,10 @@ The `experiments/interpolation.py` script simply generates two poses and that's 
 I'm pretty sure that nothing else happens, but I will confirm when I have a really good understanding of the code.
 
 ### Motion denoising
+
+TODO: This section was not revised, because I do not have the noisy data.
+Have to figure this out.
+
      python experiment/motion_denoise.py --config=configs/amass.yaml  --motion_data=<motion data folder> --ckpt_path={}  --outpath_folder={} --bm_dir_path={}
 
   
