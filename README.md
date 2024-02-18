@@ -21,6 +21,9 @@ Please follow [INSTALL.md](INSTALL.md)
 #### 1. Download AMASS: Store in a folder "amass_raw"". You can train the model for SMPL/SMPL+H or SMPL+X. 
     https://amass.is.tue.mpg.de/
 
+One has to download the SMPL model from: https://smpl.is.tue.mpg.de/.
+Currently I am using "version 1.1.0 for Python 2.7 (female/male/neutral, 300 shape PCs)"
+
 
 #### 2.1 Sample poses from AMASS:
 This is the data preparation step based on
@@ -98,9 +101,17 @@ Pose-NDF is a continuous model for plausible human poses based on neural distanc
 
 
 ### Pose generation
-    python experiments/sample_poses.py --config={} --ckpt_path={} --noisy_pose={} --outpath_folder={}
 
-noisy_pose: <filename>.npz['body_pose'] file containing random poses in quaternions. 
+    python -m experiments.sample_poses --config={} --ckpt_path={} --noisy_pose={} --outpath_folder={}
+
+where:
+
+ - `config`: path to the config file for the model.
+ Be sure to use the model and configuration file that match,
+ - `ckpt_path`: path to the checkpoint with a trained model,
+ - `noisy_pose`: is a path to an `npz` file containing random poses in quaternions,
+Examples of such files can be found in the training data.
+ - `outpath_folder`: where to save rendered initial and projected pose images.
 
 outpath_folder: save rendered initial and projected pose.
         
