@@ -147,6 +147,9 @@ Motion data file is .npz file which contains "body_pose", "betas", "root_orient"
 bm_dir_path: path to SMPL body model
 
 ### Image based 3d pose estimation
+
+TODO: Didn't cover this section, because it is not of the main interest for us currently.
+
      1. Run openpose to generate 2d keypoints for given image(https://github.com/CMU-Perceptual-Computing-Lab/openpose).
      2. python experiment/image_fitting.py --config=configs/amass.yaml  --image_dir=<image data dir>
 
