@@ -11,8 +11,8 @@ from data.data_splits import amass_splits
 import ipdb
 import torch
 import numpy as np
-from body_model import BodyModel
-from exp_utils import renderer, quat_flip
+from experiments.body_model import BodyModel
+from experiments.exp_utils import renderer, quat_flip
 
 from pytorch3d.transforms import axis_angle_to_quaternion, axis_angle_to_matrix, matrix_to_quaternion, quaternion_to_axis_angle
 from tqdm import tqdm
@@ -123,7 +123,7 @@ def sample_pose(opt, ckpt, motion_file=None,gt_data=None, out_path=None):
         #apply flip
         noisy_pose = torch.from_numpy(noisy_pose.astype(np.float32)).to(device=device)
     #  load body model
-    bm_dir_path = '/BS/garvita/work/SMPL_data/models/smpl'
+    bm_dir_path = 'smpl/models'
     body_model = BodyModel(bm_path=bm_dir_path, model_type='smpl', batch_size=batch_size,  num_betas=10).to(device=device)
 
     # create Motion denoiser layer
@@ -136,10 +136,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Interpolate using PoseNDF.'
     )
-    parser.add_argument('--config', '-c', default='/BS/humanpose/static00/pose_manifold/amass_flip_test/flip_small_softplus_l1_1e-05__10000_dist0.5_eik0_man0.1/config.yaml', type=str, help='Path to config file.')
-    parser.add_argument('--ckpt_path', '-ckpt', default='/BS/humanpose/static00/pose_manifold/amass_flip_test/flip_small_softplus_l1_1e-05__10000_dist0.5_eik0_man0.1/checkpoints/checkpoint_epoch_best.tar', type=str, help='Path to pretrained model.')
-    parser.add_argument('--noisy_pose', '-np', default='/BS/humanpose/static00/data/PoseNDF_train/smpl_h_flips/ACCAD/Female1General_c3d.npz', type=str, help='Path to noisy motion file')
-    parser.add_argument('--outpath_folder', '-out', default='/BS/humanpose/static00/data/PoseNDF_exp/sampled_poses_bad', type=str, help='Path to output')
+    parser.add_argument('--config', '-c', default='posendf/version2/config.yaml', type=str, help='Path to config file.')
+    parser.add_argument('--ckpt_path', '-ckpt', default='posendf/version2/checkpoint_epoch_best.tar', type=str, help='Path to pretrained model.')
+    parser.add_argument('--noisy_pose', '-np', nargs='?', type=str, const='training_data/ACCAD/Female1General_c3d.npz', help='Path to noisy motion file')
+    parser.add_argument('--outpath_folder', '-out', default='posendf/version2', type=str, help='Path to output')
     args = parser.parse_args()
 
     opt = load_config(args.config)

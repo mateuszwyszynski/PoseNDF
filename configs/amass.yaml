@@ -1,5 +1,9 @@
 data:
-  data_dir: ./posendf_data/ # Training data directory
+  data_dir: ./training_data/ # Training data directory
+  amass_dir: ./amass_samples/
+  num_pts: 5000
+  single: False
+  flip: False
   sample_pt: 100000
   dc: dc
 #  sample_distribution: [0.4, 0.2, 0.1, 0.1,  0.1, 0.1] #, 0.025, 0.05, 0.05, 0.05]
@@ -10,7 +14,7 @@ data:
   sample_sigmas: [ 0.0, 0.001]
 experiment:
   bodymodel: smpl
-  root_dir: /BS/humanpose/static00/pose_manifold/amass # Where to save checkpoints and final trained model_quat #todo
+  root_dir: ./posendf/exp1/ # Where to save checkpoints and final trained model_quat #todo
   data_name: PoseData
   type: BaseTrainer
   inp_name: xyz
@@ -27,7 +31,7 @@ model:
     num_parts: 21
     num_layers: 5
     ff_enc: False
-    dims: [ 256, 512, 1024, 512, 256, 64 ]
+    dims: 256, 512, 1024, 512, 256, 64
     act: lrelu
     beta: 100
   StrEnc:

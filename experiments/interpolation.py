@@ -33,9 +33,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Interpolate using PoseNDF.'
     )
-    parser.add_argument('--config', '-c', default='configs/amass.yaml', type=str, help='Path to config file.')
-    parser.add_argument('--ckpt_path', '-ckpt', default='/BS/humanpose/static00/pose_manifold/amass/main_lrelu_l1_1e-05/checkpoints/checkpoint_epoch_best.tar', type=str, help='Path to pretrained model.')
-    parser.add_argument('--pose_file', '-pf', default='motion_samp.npz', type=str, help='Path to noisy motion file')
+    parser.add_argument('--config', '-c', default='posendf/version2/config.yaml', type=str, help='Path to config file.')
+    parser.add_argument('--ckpt_path', '-ckpt', default='posendf/version2/checkpoint_epoch_best.tar', type=str, help='Path to pretrained model.')
+    parser.add_argument('--pose_file', '-pf', default='training_data/ACCAD/Female1General_c3d.npz', type=str, help='Path to noisy motion file')
     args = parser.parse_args()
 
     opt = load_config(args.config)

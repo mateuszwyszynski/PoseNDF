@@ -128,7 +128,7 @@ def main(args):
 
     device ='cuda'
     #read the pose data:
-    seq_file = os.path.join(args.raw_data, args.seq_file)
+    seq_file = os.path.join(args.sampled_data, args.seq_file)
     if not os.path.exists(seq_file):
         print('Missing sequence file.....', seq_file)
         return
@@ -149,7 +149,7 @@ def main(args):
     amass_datas = sorted(amass_splits['train'])
     # create FAISS search 
     if args.input == 'quat':
-        faiss_model, _, all_pose = faiss_idx_np(amass_datas, args.raw_data)
+        faiss_model, _, all_pose = faiss_idx_np(amass_datas, args.sampled_data)
     else:
         # create SMPL 
         num_betas=10
@@ -157,7 +157,7 @@ def main(args):
         bm_path='/BS/garvita/work/SMPL_data/models'
         bm = smplx.create(bm_path, num_betas=num_betas, batch_size=500).to(device=device)
         betas = torch.zeros((500,10)).to(device=device)
-        faiss_model, _, all_pose = faiss_idx_np_jts(amass_datas, args.raw_data, bm, batch_size=500)
+        faiss_model, _, all_pose = faiss_idx_np_jts(amass_datas, args.sampled_data, bm, batch_size=500)
 
     
     print('prepared faiss index.......', len(all_pose))
@@ -199,10 +199,10 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Preparing pose and distance paired data for training PoseNDF")
 
-    parser.add_argument("-rd", "--raw_data", type=str, default="/BS/humanpose/static00/data/PoseNDF_raw/smpl_h2",
+    parser.add_argument("-rd", "--sampled_data", type=str, default="./amass_samples",
                         help="Path to the resulting image")
     parser.add_argument("-od", "--out_dir", type=str,
-                        default="/BS/humanpose/static00/data/PoseNDF_train/smpl_h_flips",
+                        default="./training_data",
                         help="Path to the resulting image")
     parser.add_argument("-m", "--metric", type=str,
                         default='geo',

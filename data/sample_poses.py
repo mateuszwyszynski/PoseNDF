@@ -63,8 +63,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Sample distinct poses from dataset .'
     )
-    parser.add_argument('--sampled_pose_dir', '-d', type=str, help='Path to data directory(where you want to save sampled poses).')
-    parser.add_argument('--amass_dir', '-a', type=str, help='Path to AMASS dataset.')
+    parser.add_argument('--sampled_pose_dir', '-d', default="amass_samples", type=str,
+                        help='Path to data directory (where you want to save sampled poses).')
+    parser.add_argument('--amass_dir', '-a', default="./amass_raw", type=str, help='Path to AMASS dataset.')
     args = parser.parse_args()
     from data.data_splits import amass_splits
 
@@ -72,3 +73,5 @@ if __name__ == "__main__":
     amass_dir = args.amass_dir
     
     prepare_vposer_datasets(posendf_data_dir, amass_splits, amass_dir, mode='test')
+    prepare_vposer_datasets(posendf_data_dir, amass_splits, amass_dir, mode='train')
+    prepare_vposer_datasets(posendf_data_dir, amass_splits, amass_dir, mode='vald')
