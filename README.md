@@ -172,3 +172,6 @@ Both image and corresponding keypoint should be in same directory with <image_na
  This might lead you to the cause of the problem.
  I have encountered such errors when running the code on GCP and managed to go around it by switching to a fresh VM with a more recent CUDA version.
  So I believe that in the end the problem was caused by some problems with installing `pytorch3d` with the CUDA setup from the other machine.
+ - if you get an `ImportError: cannot import name 'bool' from 'numpy'` then you have to downgrade the version of numpy
+ (this is mentioned in the installation steps).
+ Discussed [here on Stack Overflow](https://stackoverflow.com/questions/74893742/how-to-solve-attributeerror-module-numpy-has-no-attribute-bool).
