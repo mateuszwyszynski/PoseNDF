@@ -117,8 +117,23 @@ outpath_folder: save rendered initial and projected pose.
         
 
 ### Pose interpolation
-     python experiment/interpolation.py --config=configs/amass.yaml 
+    python -m experiments.interpolation --config={} --ckpt_path={} --pose_file={}
 
+where parameters are the same as in _Pose generation_ with `pose_file` parameter being the equivalent of `noisy_pose` (no idea why...)
+
+The `ipdb` package is used by this script.
+Basically:
+ - type `n` and press `Enter` to execute the next line
+ - or type `c` and press Enter to execute until the next breaking point
+
+More info how to use IPDB can be found [here](https://www.geeksforgeeks.org/using-ipdb-to-debug-python-code/) or [here](https://wangchuan.github.io/coding/2017/07/12/ipdb-cheat-sheet.html)
+
+TODO:
+1. Most likely we do not want to rely on IPDB.
+Not intuitive and badly documented.
+2. More importantly, I believe there is no code which actually performs pose interpolation.
+The `experiments/interpolation.py` script simply generates two poses and that's all.
+I'm pretty sure that nothing else happens, but I will confirm when I have a really good understanding of the code.
 
 ### Motion denoising
      python experiment/motion_denoise.py --config=configs/amass.yaml  --motion_data=<motion data folder> --ckpt_path={}  --outpath_folder={} --bm_dir_path={}
