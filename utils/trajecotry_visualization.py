@@ -29,6 +29,7 @@ from typing_extensions import Literal
 
 
 def main(
+    poses_path: Path,
     model_path: Path,
     model_type: Literal["smpl", "smplh", "smplx", "mano"] = "smplx",
     gender: Literal["male", "female", "neutral"] = "neutral",
@@ -52,14 +53,19 @@ def main(
         ext=ext,
     )
 
+    poses = torch.from_numpy(onp.load(poses_path)['poses'][:, 3:66].astype('float32')).reshape(-1, 21, 3)
+    n_poses = poses.shape[0]
+
     # Main loop. We'll just keep read from the joints, deform the mesh, then sending the
     # updated mesh in a loop. This could be made a lot more efficient.
     gui_elements = make_gui_elements(
         server, num_betas=model.num_betas, num_body_joints=int(model.NUM_BODY_JOINTS)
     )
+    playing_animation = False
     while True:
         # Do nothing if no change.
-        if not gui_elements.changed:
+        if not playing_animation and not gui_elements.changed:
+            current_pose_ind = 0
             time.sleep(0.01)
             continue
         gui_elements.changed = False
@@ -69,6 +75,11 @@ def main(
                 [j.value for j in gui_elements.gui_joints[1:]], dtype=onp.float32
             )[None, ...]  # type: ignore
         )
+
+        if gui_elements.gui_play_animation.value:
+            full_pose = poses[current_pose_ind].reshape(1, 21, 3)
+            current_pose_ind += 1
+            playing_animation = current_pose_ind < n_poses
 
         # Get deformed mesh.
         output = model.forward(
@@ -121,6 +132,7 @@ class GuiElements:
     gui_wireframe: viser.GuiInputHandle[bool]
     gui_betas: List[viser.GuiInputHandle[float]]
     gui_joints: List[viser.GuiInputHandle[Tuple[float, float, float]]]
+    gui_play_animation: viser.GuiInputHandle[bool]
 
     changed: bool
     """This flag will be flipped to True whenever the mesh needs to be re-generated."""
@@ -138,6 +150,12 @@ def make_gui_elements(
         gui_rgb = server.add_gui_rgb("Color", initial_value=(90, 200, 255))
         gui_wireframe = server.add_gui_checkbox("Wireframe", initial_value=False)
         gui_show_controls = server.add_gui_checkbox("Handles", initial_value=False)
+
+        gui_play_animation = server.add_gui_button("Play animation")
+
+        @gui_play_animation.on_click
+        def _(_):
+            out.changed = True
 
         @gui_rgb.on_update
         def _(_):
@@ -247,7 +265,7 @@ def make_gui_elements(
 
     add_transform_controls(enabled=False)
 
-    out = GuiElements(gui_rgb, gui_wireframe, gui_betas, gui_joints, changed=True)
+    out = GuiElements(gui_rgb, gui_wireframe, gui_betas, gui_joints, gui_play_animation, changed=True)
     return out
 
 
