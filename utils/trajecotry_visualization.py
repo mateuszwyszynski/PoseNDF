@@ -53,7 +53,16 @@ def main(
         ext=ext,
     )
 
-    poses = torch.from_numpy(onp.load(poses_path)['poses'][:, 3:66].astype('float32')).reshape(-1, 21, 3)
+    motion_data = onp.load(poses_path)
+    if 'poses' in list(motion_data.keys()):
+        poses_key = 'poses'
+        poses_start_ind = 3
+        poses_end_ind = 66
+    else:
+        poses_key = 'pose_body'
+        poses_start_ind = 0
+        poses_end_ind = 63
+    poses = torch.from_numpy(motion_data[poses_key][:, poses_start_ind:poses_end_ind].astype('float32')).reshape(-1, 21, 3)
     n_poses = poses.shape[0]
 
     # Main loop. We'll just keep read from the joints, deform the mesh, then sending the
