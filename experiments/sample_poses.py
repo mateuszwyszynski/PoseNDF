@@ -55,6 +55,27 @@ class SamplePose(object):
         if render:
             renderer(vertices, faces, out_path, device=device,  prefix=prefix)
 
+    def projection_step(self, noisy_poses):
+        net_pred = self.pose_prior(noisy_poses, train=False)
+        grad_val = gradient(noisy_poses, net_pred['dist_pred']).reshape(-1, 84)
+        noisy_poses = noisy_poses.detach()
+        net_pred['dist_pred'] = net_pred['dist_pred'].detach()
+        print(torch.mean(net_pred['dist_pred']))
+        grad_norm = torch.nn.functional.normalize(grad_val, p=2.0, dim=-1)
+        noisy_poses = noisy_poses - (net_pred['dist_pred']*grad_norm).reshape(-1, 21,4)
+        noisy_poses, _ = quat_flip(noisy_poses)
+        noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=-1)
+        noisy_poses = noisy_poses.detach()
+        noisy_poses.requires_grad = True
+
+        # print(torch.mean(net_pred['dist_pred']))
+        # grad = gradient(noisy_poses, net_pred['dist_pred']).reshape(-1, 84)
+        # grad_norm = torch.nn.functional.normalize(grad, p=2.0, dim=-1)
+        # noisy_poses = noisy_poses - (net_pred['dist_pred']*grad_norm).reshape(-1, 21,4)
+        # noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=-1
+
+        return noisy_poses
+
 
     def project(self, noisy_poses, gt_poses=None,  iterations=10, steps_per_iter=50):
         # create initial SMPL joints and vertices for visualition(to be used for data term)
@@ -73,27 +94,7 @@ class SamplePose(object):
 
         
         for it in range(100):
-
-            # flip and normalize pose before projecting
-
-
-            net_pred = self.pose_prior(noisy_poses, train=False)
-            grad_val = gradient(noisy_poses, net_pred['dist_pred']).reshape(-1, 84)
-            noisy_poses = noisy_poses.detach()
-            net_pred['dist_pred'] = net_pred['dist_pred'].detach()
-            print(torch.mean(net_pred['dist_pred']))
-            grad_norm = torch.nn.functional.normalize(grad_val, p=2.0, dim=-1)
-            noisy_poses = noisy_poses - (net_pred['dist_pred']*grad_norm).reshape(-1, 21,4)
-            noisy_poses, _ = quat_flip(noisy_poses)
-            noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=-1)
-            noisy_poses = noisy_poses.detach()
-            noisy_poses.requires_grad = True
-
-            # print(torch.mean(net_pred['dist_pred']))
-            # grad = gradient(noisy_poses, net_pred['dist_pred']).reshape(-1, 84)
-            # grad_norm = torch.nn.functional.normalize(grad, p=2.0, dim=-1)
-            # noisy_poses = noisy_poses - (net_pred['dist_pred']*grad_norm).reshape(-1, 21,4)
-            # noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=-1)
+            noisy_poses = self.projection_step(noisy_poses)
 
         # create final results
         noise_pose_aa = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
