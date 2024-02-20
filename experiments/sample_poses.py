@@ -77,7 +77,7 @@ class SamplePose(object):
         return noisy_poses
 
 
-    def project(self, noisy_poses, iterations=100, save_projection_steps=False):
+    def project(self, noisy_poses, iterations=100, save_projection_steps=True):
         # create initial SMPL joints and vertices for visualition(to be used for data term)
         noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
         noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
@@ -93,14 +93,14 @@ class SamplePose(object):
             projection_steps_path = os.path.join(self.out_path, 'projection_steps')
             os.makedirs(projection_steps_path, exist_ok=True)
             batch_size, num_joints, angles = noisy_poses_axis_angle.shape
-            projection_steps = torch.clone(noisy_poses_axis_angle).reshape(batch_size, 1, num_joints, angles)
+            projection_steps = torch.clone(noisy_poses_axis_angle).reshape(batch_size, 1, num_joints*angles)
         
         for _ in range(iterations):
             noisy_poses = self.projection_step(noisy_poses)
 
             if save_projection_steps:
                 noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
-                projection_steps = torch.cat((projection_steps, noisy_poses_axis_angle.reshape(batch_size, 1, num_joints, angles)), dim=1)
+                projection_steps = torch.cat((projection_steps, noisy_poses_axis_angle.reshape(batch_size, 1, num_joints*angles)), dim=1)
                 for motion_ind in range(batch_size):
                     np.savez(os.path.join(projection_steps_path, f'{motion_ind}.npz'), pose_body=np.array(projection_steps[motion_ind].cpu().detach().numpy()))
 
