@@ -79,24 +79,23 @@ class SamplePose(object):
 
     def project(self, noisy_poses, iterations=100):
         # create initial SMPL joints and vertices for visualition(to be used for data term)
-        noise_pose_aa = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
-        noise_pose_aa[:, :21] = quaternion_to_axis_angle(noisy_poses)
-        smpl_init = self.body_model(betas=self.betas, pose_body=noise_pose_aa.view(-1, 69)) 
+        noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
+        noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
+        smpl_init = self.body_model(betas=self.betas, pose_body=noisy_poses_axis_angle.view(-1, 69))
         self.visualize(smpl_init.vertices, smpl_init.faces, self.out_path, device=self.device, joints=smpl_init.Jtr, render=True, prefix='init')
 
         noisy_poses, _ = quat_flip(noisy_poses)
         noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=-1)
 
         noisy_poses.requires_grad = True
-
         
         for _ in range(iterations):
             noisy_poses = self.projection_step(noisy_poses)
 
         # create final results
-        noise_pose_aa = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
-        noise_pose_aa[:, :21] = quaternion_to_axis_angle(noisy_poses)
-        smpl_init = self.body_model(betas=self.betas, pose_body=noise_pose_aa.view(-1, 69)) 
+        noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
+        noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
+        smpl_init = self.body_model(betas=self.betas, pose_body=noisy_poses_axis_angle.view(-1, 69))
         self.visualize(smpl_init.vertices, smpl_init.faces, self.out_path, device=self.device, joints=smpl_init.Jtr, render=True,prefix='out')
 
 
