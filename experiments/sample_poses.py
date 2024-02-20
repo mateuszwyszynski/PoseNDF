@@ -77,7 +77,7 @@ class SamplePose(object):
         return noisy_poses
 
 
-    def project(self, noisy_poses, gt_poses=None,  iterations=10, steps_per_iter=50):
+    def project(self, noisy_poses, gt_poses=None,  iterations=100, steps_per_iter=50):
         # create initial SMPL joints and vertices for visualition(to be used for data term)
         noise_pose_aa = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
         noise_pose_aa[:, :21] = quaternion_to_axis_angle(noisy_poses)
@@ -93,7 +93,7 @@ class SamplePose(object):
         noisy_poses.requires_grad = True
 
         
-        for it in range(100):
+        for it in range(iterations):
             noisy_poses = self.projection_step(noisy_poses)
 
         # create final results
