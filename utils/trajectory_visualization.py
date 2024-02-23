@@ -12,11 +12,15 @@ parameters to run this script:
 - https://github.com/vchoutas/smplx
 """
 
+from configs.config import load_config
+from model.posendf import PoseNDF
+
 import dataclasses
 import time
 from pathlib import Path
 from typing import List, Tuple
 
+from pytorch3d.transforms import axis_angle_to_quaternion
 import numpy as onp
 import smplx
 import smplx.joint_names
@@ -31,6 +35,8 @@ from typing_extensions import Literal
 def main(
     poses_path: Path,
     model_path: Path,
+    config: Path,
+    checkpoint_path: Path,
     model_type: Literal["smpl", "smplh", "smplx", "mano"] = "smplx",
     gender: Literal["male", "female", "neutral"] = "neutral",
     num_betas: int = 10,
@@ -53,6 +59,11 @@ def main(
         ext=ext,
     )
 
+    opt = load_config(config)
+    posendf = PoseNDF(opt)
+    device= 'cuda:0'
+    posendf.load_checkpoint_from_path(checkpoint_path, device=device, training=False)
+
     poses, num_poses = load_movement_data(poses_path)
 
     # Main loop. We'll just keep read from the joints, deform the mesh, then sending the
@@ -65,7 +76,7 @@ def main(
         # Do nothing if no change.
         while gui_elements.gui_playing.value:
             full_pose = poses[gui_elements.gui_timestep.value].reshape(1, 21, 3)
-            update_model(server, gui_elements, model, full_pose)
+            update_model(server, gui_elements, model, full_pose, posendf)
             gui_elements.gui_timestep.value = (gui_elements.gui_timestep.value + 1) % num_poses
             time.sleep(0.01)
         if not gui_elements.changed:
@@ -81,10 +92,10 @@ def main(
 
         full_pose = poses[gui_elements.gui_timestep.value].reshape(1, 21, 3)
 
-        update_model(server, gui_elements, model, full_pose)
+        update_model(server, gui_elements, model, full_pose, posendf)
         gui_elements.changed = False
 
-def update_model(server, gui_elements, model, full_pose):
+def update_model(server, gui_elements, model, full_pose, posendf):
     output = model.forward(
         betas=torch.from_numpy(  # type: ignore
             onp.array([b.value for b in gui_elements.gui_betas], dtype=onp.float32)[
@@ -126,6 +137,10 @@ def update_model(server, gui_elements, model, full_pose):
             show_axes=False,
         )
 
+    prediction_for_current_pose = posendf(axis_angle_to_quaternion(full_pose), train=False)
+    distance_to_manifold = prediction_for_current_pose['dist_pred'].detach().cpu().numpy()[0][0]
+    gui_elements.gui_distance.value = float(distance_to_manifold)
+
 
 def load_movement_data(path: Path) -> Tuple[onp.ndarray, int]:
     """Load movement data from a file."""
@@ -155,6 +170,7 @@ class GuiElements:
     gui_timestep: viser.GuiInputHandle[int]
     gui_next_pose: viser.GuiInputHandle[bool]
     gui_prev_pose: viser.GuiInputHandle[bool]
+    gui_distance: viser.GuiInputHandle[float]
 
     changed: bool
     """This flag will be flipped to True whenever the mesh needs to be re-generated."""
@@ -169,6 +185,13 @@ def make_gui_elements(
 
     # GUI elements: animation controls.
     with tab_group.add_tab("Player"):
+
+        gui_distance = server.add_gui_number(
+            "Distance to manifold",
+            initial_value=0,
+            disabled=True,
+            step=0.0001
+        )
 
         # Add playback UI.
         with server.add_gui_folder("Playback"):
@@ -327,7 +350,7 @@ def make_gui_elements(
 
     out = GuiElements(
         gui_rgb, gui_wireframe, gui_betas, gui_joints, gui_playing,
-        gui_timestep, gui_next_pose, gui_prev_pose, changed=True
+        gui_timestep, gui_next_pose, gui_prev_pose, gui_distance, changed=True
         )
     return out
 
