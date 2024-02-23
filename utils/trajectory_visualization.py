@@ -154,17 +154,19 @@ def make_gui_elements(
 
     tab_group = server.add_gui_tab_group()
 
-    # GUI elements: mesh settings + visibility.
-    with tab_group.add_tab("View", viser.Icon.VIEWFINDER):
-        gui_rgb = server.add_gui_rgb("Color", initial_value=(90, 200, 255))
-        gui_wireframe = server.add_gui_checkbox("Wireframe", initial_value=False)
-        gui_show_controls = server.add_gui_checkbox("Handles", initial_value=False)
-
+    # GUI elements: animation controls.
+    with tab_group.add_tab("Player"):
         gui_play_animation = server.add_gui_button("Play animation")
 
         @gui_play_animation.on_click
         def _(_):
             out.changed = True
+
+    # GUI elements: mesh settings + visibility.
+    with tab_group.add_tab("View", viser.Icon.VIEWFINDER):
+        gui_rgb = server.add_gui_rgb("Color", initial_value=(90, 200, 255))
+        gui_wireframe = server.add_gui_checkbox("Wireframe", initial_value=False)
+        gui_show_controls = server.add_gui_checkbox("Handles", initial_value=False)
 
         @gui_rgb.on_update
         def _(_):
