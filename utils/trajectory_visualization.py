@@ -53,7 +53,83 @@ def main(
         ext=ext,
     )
 
-    motion_data = onp.load(poses_path)
+    poses, num_poses = load_movement_data(poses_path)
+
+    # Main loop. We'll just keep read from the joints, deform the mesh, then sending the
+    # updated mesh in a loop. This could be made a lot more efficient.
+    gui_elements = make_gui_elements(
+        server, num_betas=model.num_betas, num_body_joints=int(model.NUM_BODY_JOINTS),
+        num_poses=num_poses
+    )
+    while True:
+        # Do nothing if no change.
+        while gui_elements.gui_playing.value:
+            full_pose = poses[gui_elements.gui_timestep.value].reshape(1, 21, 3)
+            update_model(server, gui_elements, model, full_pose)
+            gui_elements.gui_timestep.value = (gui_elements.gui_timestep.value + 1) % num_poses
+            time.sleep(0.01)
+        if not gui_elements.changed:
+            current_pose_ind = 0
+            time.sleep(0.01)
+            continue
+
+        full_pose = torch.from_numpy(
+            onp.array(
+                [j.value for j in gui_elements.gui_joints[1:]], dtype=onp.float32
+            )[None, ...]  # type: ignore
+        )
+
+        full_pose = poses[gui_elements.gui_timestep.value].reshape(1, 21, 3)
+
+        update_model(server, gui_elements, model, full_pose)
+        gui_elements.changed = False
+
+def update_model(server, gui_elements, model, full_pose):
+    output = model.forward(
+        betas=torch.from_numpy(  # type: ignore
+            onp.array([b.value for b in gui_elements.gui_betas], dtype=onp.float32)[
+                None, ...
+            ]
+        ),
+        expression=None,
+        return_verts=True,
+        body_pose=full_pose[:, : model.NUM_BODY_JOINTS],  # type: ignore
+        global_orient=torch.from_numpy(
+            onp.array(gui_elements.gui_joints[0].value, dtype=onp.float32)[
+                None, ...
+            ]
+        ),  # type: ignore
+        return_full_pose=True,
+    )
+    joint_positions = output.joints.squeeze(axis=0).detach().cpu().numpy()  # type: ignore
+    joint_transforms, parents = joint_transforms_and_parents_from_smpl(
+        model, output
+    )
+
+    # Send mesh to visualizer.
+    server.add_mesh_simple(
+        "/smpl",
+        vertices=output.vertices.squeeze(axis=0).detach().cpu().numpy(),  # type: ignore
+        faces=model.faces,
+        wireframe=gui_elements.gui_wireframe.value,
+        color=gui_elements.gui_rgb.value,
+        flat_shading=False,
+    )
+
+    # Update per-joint frames, which are used for transform controls.
+    for i in range(model.NUM_BODY_JOINTS + 1):
+        R = joint_transforms[parents[i], :3, :3]
+        server.add_frame(
+            f"/smpl/joint_{i}",
+            wxyz=((1.0, 0.0, 0.0, 0.0) if i == 0 else tf.SO3.from_matrix(R).wxyz),
+            position=joint_positions[i],
+            show_axes=False,
+        )
+
+
+def load_movement_data(path: Path) -> Tuple[onp.ndarray, int]:
+    """Load movement data from a file."""
+    motion_data = onp.load(path)
     if 'poses' in list(motion_data.keys()):
         poses_key = 'poses'
         poses_start_ind = 3
@@ -63,74 +139,8 @@ def main(
         poses_start_ind = 0
         poses_end_ind = 63
     poses = torch.from_numpy(motion_data[poses_key][:, poses_start_ind:poses_end_ind].astype('float32')).reshape(-1, 21, 3)
-    n_poses = poses.shape[0]
-
-    # Main loop. We'll just keep read from the joints, deform the mesh, then sending the
-    # updated mesh in a loop. This could be made a lot more efficient.
-    gui_elements = make_gui_elements(
-        server, num_betas=model.num_betas, num_body_joints=int(model.NUM_BODY_JOINTS)
-    )
-    playing_animation = False
-    while True:
-        # Do nothing if no change.
-        if not playing_animation and not gui_elements.changed:
-            current_pose_ind = 0
-            time.sleep(0.01)
-            continue
-        gui_elements.changed = False
-
-        full_pose = torch.from_numpy(
-            onp.array(
-                [j.value for j in gui_elements.gui_joints[1:]], dtype=onp.float32
-            )[None, ...]  # type: ignore
-        )
-
-        if gui_elements.gui_play_animation.value:
-            full_pose = poses[current_pose_ind].reshape(1, 21, 3)
-            current_pose_ind += 1
-            playing_animation = current_pose_ind < n_poses
-
-        # Get deformed mesh.
-        output = model.forward(
-            betas=torch.from_numpy(  # type: ignore
-                onp.array([b.value for b in gui_elements.gui_betas], dtype=onp.float32)[
-                    None, ...
-                ]
-            ),
-            expression=None,
-            return_verts=True,
-            body_pose=full_pose[:, : model.NUM_BODY_JOINTS],  # type: ignore
-            global_orient=torch.from_numpy(
-                onp.array(gui_elements.gui_joints[0].value, dtype=onp.float32)[
-                    None, ...
-                ]
-            ),  # type: ignore
-            return_full_pose=True,
-        )
-        joint_positions = output.joints.squeeze(axis=0).detach().cpu().numpy()  # type: ignore
-        joint_transforms, parents = joint_transforms_and_parents_from_smpl(
-            model, output
-        )
-
-        # Send mesh to visualizer.
-        server.add_mesh_simple(
-            "/smpl",
-            vertices=output.vertices.squeeze(axis=0).detach().cpu().numpy(),  # type: ignore
-            faces=model.faces,
-            wireframe=gui_elements.gui_wireframe.value,
-            color=gui_elements.gui_rgb.value,
-            flat_shading=False,
-        )
-
-        # Update per-joint frames, which are used for transform controls.
-        for i in range(model.NUM_BODY_JOINTS + 1):
-            R = joint_transforms[parents[i], :3, :3]
-            server.add_frame(
-                f"/smpl/joint_{i}",
-                wxyz=((1.0, 0.0, 0.0, 0.0) if i == 0 else tf.SO3.from_matrix(R).wxyz),
-                position=joint_positions[i],
-                show_axes=False,
-            )
+    num_poses = poses.shape[0]
+    return poses, num_poses
 
 
 @dataclasses.dataclass
@@ -141,14 +151,17 @@ class GuiElements:
     gui_wireframe: viser.GuiInputHandle[bool]
     gui_betas: List[viser.GuiInputHandle[float]]
     gui_joints: List[viser.GuiInputHandle[Tuple[float, float, float]]]
-    gui_play_animation: viser.GuiInputHandle[bool]
+    gui_playing: viser.GuiInputHandle[bool]
+    gui_timestep: viser.GuiInputHandle[int]
+    gui_next_pose: viser.GuiInputHandle[bool]
+    gui_prev_pose: viser.GuiInputHandle[bool]
 
     changed: bool
     """This flag will be flipped to True whenever the mesh needs to be re-generated."""
 
 
 def make_gui_elements(
-    server: viser.ViserServer, num_betas: int, num_body_joints: int
+    server: viser.ViserServer, num_betas: int, num_body_joints: int, num_poses: int
 ) -> GuiElements:
     """Make GUI elements for interacting with the model."""
 
@@ -156,11 +169,47 @@ def make_gui_elements(
 
     # GUI elements: animation controls.
     with tab_group.add_tab("Player"):
-        gui_play_animation = server.add_gui_button("Play animation")
 
-        @gui_play_animation.on_click
-        def _(_):
+        # Add playback UI.
+        with server.add_gui_folder("Playback"):
+            gui_timestep = server.add_gui_slider(
+                "Pose index",
+                min=0,
+                max=num_poses - 1,
+                step=1,
+                initial_value=0,
+                disabled=False,
+            )
+            gui_next_pose = server.add_gui_button("Next Pose", disabled=False)
+            gui_prev_pose = server.add_gui_button("Prev Pose", disabled=False)
+            gui_playing = server.add_gui_checkbox("Playing", False)
+            gui_framerate = server.add_gui_slider(
+                "FPS", min=1, max=60, step=0.1, initial_value=1
+            )
+            gui_framerate_options = server.add_gui_button_group(
+                "FPS options", ("10", "20", "30", "60")
+            )
+
+        @gui_playing.on_update
+        def _(_) -> None:
+            gui_timestep.disabled = gui_playing.value
+            gui_next_pose.disabled = gui_playing.value
+            gui_prev_pose.disabled = gui_playing.value
+
+        @gui_next_pose.on_click
+        def _(_) -> None:
+            gui_timestep.value = (gui_timestep.value + 1) % num_poses
             out.changed = True
+
+        @gui_prev_pose.on_click
+        def _(_) -> None:
+            gui_timestep.value = (gui_timestep.value - 1) % num_poses
+            out.changed = True
+
+        @gui_timestep.on_update
+        def _(_) -> None:
+            out.changed = True
+
 
     # GUI elements: mesh settings + visibility.
     with tab_group.add_tab("View", viser.Icon.VIEWFINDER):
@@ -276,7 +325,10 @@ def make_gui_elements(
 
     add_transform_controls(enabled=False)
 
-    out = GuiElements(gui_rgb, gui_wireframe, gui_betas, gui_joints, gui_play_animation, changed=True)
+    out = GuiElements(
+        gui_rgb, gui_wireframe, gui_betas, gui_joints, gui_playing,
+        gui_timestep, gui_next_pose, gui_prev_pose, changed=True
+        )
     return out
 
 
