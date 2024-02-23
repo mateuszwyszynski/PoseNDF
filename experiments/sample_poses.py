@@ -111,14 +111,10 @@ class SamplePose(object):
         self.visualize(smpl_init.vertices, smpl_init.faces, self.out_path, device=self.device, joints=smpl_init.Jtr, render=True,prefix='out')
 
 
-def sample_pose(opt, ckpt, motion_file=None,gt_data=None, out_path=None):
-    ### load the model
+def sample_pose(opt, ckpt_path, motion_file=None,gt_data=None, out_path=None):
     net = PoseNDF(opt)
     device= 'cuda:0'
-    ckpt = torch.load(ckpt, map_location='cpu')['model_state_dict']
-    net.load_state_dict(ckpt)
-    net.eval()
-    net = net.to(device)
+    net.load_checkpoint_from_path(ckpt_path, device=device, training=False)
     batch_size= 10
     if motion_file is None:
          #if noisy pose path not given, then generate random quaternions
