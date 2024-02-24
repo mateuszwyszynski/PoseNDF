@@ -107,23 +107,24 @@ A pose is generated in two steps:
 
 You can generate random plausible poses with:
 
-    python -m experiments.sample_poses --config={} --ckpt-path={} --num-poses={} --poses-file={} --out-dir={} --render --save-projection-steps
+    python -m experiments.sample_poses --experiment-dir={}--config={} --ckpt-path={} --num-poses={} --poses-file={} --render --save-projection-steps
 
 where:
 
- - `--config`: path to the config file for the model.
- Be sure to use the model and configuration file that match,
- - `--ckpt-path`: path to the checkpoint with a trained model,
+ - `--experiment-dir`: directory where the checkpoint and config files are stored.
+ The results, if appropriate flags are present, will also be saved under this directory.
+ - `--config` (optional): relative path (w.r.t `--experiment-dir`) to the config file for the model.
+ Be sure to use the model and configuration file that match.
+ - `--ckpt-path`: relative path (w.r.t `--experiment-dir`) to the checkpoint with a trained model,
  - `--num-poses` (optional): how many poses should be generated.
  Default is one.
- - `--poses-file` (optional): is a path to an `npz` file containing poses with initial, random values assigned to joints.
+ - `--poses-file` (optional): the path (relative to the place the script is executed) to an `npz` file containing poses with initial, random values assigned to joints.
  The poses should be represented with quaternions.
  Examples of such files can be found in the training data.
  If no file is provided, joint values for each pose are initialized randomly.
- - `--out-dir`: where the poses generated during projection steps should be saved
- - `--render`: whether to render the initial random poses and the projected poses.
+ - `--render` (optional): whether to render the initial random poses and the projected poses.
  If the flag is missing nothing is rendered.
- - `--save-projections-steps`: whether to save an `.npz` file with poses obtained in each step of the projection algorithm.
+ - `--save-projections-steps` (optional): whether to save an `.npz` file with poses obtained in each step of the projection algorithm.
  If the flag is missing nothing is saved.
         
 ### Pose interpolation

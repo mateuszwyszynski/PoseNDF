@@ -1,5 +1,6 @@
 """Sample poses from manifold"""
 import numpy as np
+import os
 from pathlib import Path
 from pytorch3d.transforms import quaternion_to_axis_angle
 import torch
@@ -13,13 +14,13 @@ from model.posendf import PoseNDF
 
 
 def sample_poses(
-        config: Path, ckpt_path: Path, num_poses: int = 1, poses_file: Path = None, out_dir: Path = None,
-        render: bool = False, save_projection_steps: bool = False
+        experiment_dir: Path = None, config: str = 'config.yaml', ckpt_path: str = 'checkpoint_epoch_best.tar',
+        num_poses: int = 1, poses_file: Path = None, render: bool = False, save_projection_steps: bool = False
         ):
-    opt = load_config(config)
+    opt = load_config(os.path.join(experiment_dir, config))
     net = PoseNDF(opt)
     device= 'cuda:0'
-    net.load_checkpoint_from_path(ckpt_path, device=device, training=False)
+    net.load_checkpoint_from_path(os.path.join(experiment_dir, ckpt_path), device=device, training=False)
     if poses_file is None:
          #if noisy pose path not given, then generate random quaternions
         noisy_poses = torch.rand((num_poses,21,4))
@@ -41,10 +42,10 @@ def sample_poses(
         noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=device)
         noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
         smpl_init = body_model(betas=betas, pose_body=noisy_poses_axis_angle.view(-1, 69))
-        renderer(smpl_init.vertices, smpl_init.faces, out_dir, device=device, prefix='init')
+        renderer(smpl_init.vertices, smpl_init.faces, experiment_dir, device=device, prefix='init')
 
     # create Motion denoiser layer
-    projector = Projector(net, out_path=out_dir)
+    projector = Projector(net, out_path=experiment_dir)
     projected_poses = projector.project(noisy_poses, save_projection_steps=save_projection_steps)
 
     # render final poses
@@ -52,7 +53,7 @@ def sample_poses(
         projected_poses_axis_angle = torch.zeros((len(projected_poses), 23, 3)).to(device=device)
         projected_poses_axis_angle[:, :21] = quaternion_to_axis_angle(projected_poses)
         smpl_init = body_model(betas=betas, pose_body=projected_poses_axis_angle.view(-1, 69))
-        renderer(smpl_init.vertices, smpl_init.faces, out_dir, device=device, prefix='out')
+        renderer(smpl_init.vertices, smpl_init.faces, experiment_dir, device=device, prefix='out')
 
 
 if __name__ == '__main__':
