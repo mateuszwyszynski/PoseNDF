@@ -55,61 +55,66 @@ class SamplePose(object):
         if render:
             renderer(vertices, faces, out_path, device=device,  prefix=prefix)
 
+    def projection_step(self, noisy_poses):
+        net_pred = self.pose_prior(noisy_poses, train=False)
+        grad_val = gradient(noisy_poses, net_pred['dist_pred']).reshape(-1, 84)
+        noisy_poses = noisy_poses.detach()
+        net_pred['dist_pred'] = net_pred['dist_pred'].detach()
+        print(torch.mean(net_pred['dist_pred']))
+        grad_norm = torch.nn.functional.normalize(grad_val, p=2.0, dim=-1)
+        noisy_poses = noisy_poses - (net_pred['dist_pred']*grad_norm).reshape(-1, 21,4)
+        noisy_poses, _ = quat_flip(noisy_poses)
+        noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=-1)
+        noisy_poses = noisy_poses.detach()
+        noisy_poses.requires_grad = True
 
-    def project(self, noisy_poses, gt_poses=None,  iterations=10, steps_per_iter=50):
+        # print(torch.mean(net_pred['dist_pred']))
+        # grad = gradient(noisy_poses, net_pred['dist_pred']).reshape(-1, 84)
+        # grad_norm = torch.nn.functional.normalize(grad, p=2.0, dim=-1)
+        # noisy_poses = noisy_poses - (net_pred['dist_pred']*grad_norm).reshape(-1, 21,4)
+        # noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=-1
+
+        return noisy_poses
+
+
+    def project(self, noisy_poses, iterations=100, save_projection_steps=True):
         # create initial SMPL joints and vertices for visualition(to be used for data term)
-        noise_pose_aa = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
-        noise_pose_aa[:, :21] = quaternion_to_axis_angle(noisy_poses)
-        smpl_init = self.body_model(betas=self.betas, pose_body=noise_pose_aa.view(-1, 69)) 
+        noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
+        noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
+        smpl_init = self.body_model(betas=self.betas, pose_body=noisy_poses_axis_angle.view(-1, 69))
         self.visualize(smpl_init.vertices, smpl_init.faces, self.out_path, device=self.device, joints=smpl_init.Jtr, render=True, prefix='init')
 
-        init_verts = smpl_init.vertices.detach().cpu().numpy()
-        pose_init = noise_pose_aa.detach().cpu().numpy()
-        quat_init = noisy_poses.detach().cpu().numpy()
         noisy_poses, _ = quat_flip(noisy_poses)
         noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=-1)
 
         noisy_poses.requires_grad = True
 
+        if save_projection_steps:
+            projection_steps_path = os.path.join(self.out_path, 'projection_steps')
+            os.makedirs(projection_steps_path, exist_ok=True)
+            batch_size, num_joints, angles = noisy_poses_axis_angle.shape
+            projection_steps = torch.clone(noisy_poses_axis_angle).reshape(batch_size, 1, num_joints*angles)
         
-        for it in range(100):
+        for _ in range(iterations):
+            noisy_poses = self.projection_step(noisy_poses)
 
-            # flip and normalize pose before projecting
-
-
-            net_pred = self.pose_prior(noisy_poses, train=False)
-            grad_val = gradient(noisy_poses, net_pred['dist_pred']).reshape(-1, 84)
-            noisy_poses = noisy_poses.detach()
-            net_pred['dist_pred'] = net_pred['dist_pred'].detach()
-            print(torch.mean(net_pred['dist_pred']))
-            grad_norm = torch.nn.functional.normalize(grad_val, p=2.0, dim=-1)
-            noisy_poses = noisy_poses - (net_pred['dist_pred']*grad_norm).reshape(-1, 21,4)
-            noisy_poses, _ = quat_flip(noisy_poses)
-            noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=-1)
-            noisy_poses = noisy_poses.detach()
-            noisy_poses.requires_grad = True
-
-            # print(torch.mean(net_pred['dist_pred']))
-            # grad = gradient(noisy_poses, net_pred['dist_pred']).reshape(-1, 84)
-            # grad_norm = torch.nn.functional.normalize(grad, p=2.0, dim=-1)
-            # noisy_poses = noisy_poses - (net_pred['dist_pred']*grad_norm).reshape(-1, 21,4)
-            # noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=-1)
+            if save_projection_steps:
+                noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
+                projection_steps = torch.cat((projection_steps, noisy_poses_axis_angle.reshape(batch_size, 1, num_joints*angles)), dim=1)
+                for motion_ind in range(batch_size):
+                    np.savez(os.path.join(projection_steps_path, f'{motion_ind}.npz'), pose_body=np.array(projection_steps[motion_ind].cpu().detach().numpy()))
 
         # create final results
-        noise_pose_aa = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
-        noise_pose_aa[:, :21] = quaternion_to_axis_angle(noisy_poses)
-        smpl_init = self.body_model(betas=self.betas, pose_body=noise_pose_aa.view(-1, 69)) 
+        noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
+        noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
+        smpl_init = self.body_model(betas=self.betas, pose_body=noisy_poses_axis_angle.view(-1, 69))
         self.visualize(smpl_init.vertices, smpl_init.faces, self.out_path, device=self.device, joints=smpl_init.Jtr, render=True,prefix='out')
 
 
-def sample_pose(opt, ckpt, motion_file=None,gt_data=None, out_path=None):
-    ### load the model
+def sample_pose(opt, ckpt_path, motion_file=None,gt_data=None, out_path=None):
     net = PoseNDF(opt)
     device= 'cuda:0'
-    ckpt = torch.load(ckpt, map_location='cpu')['model_state_dict']
-    net.load_state_dict(ckpt)
-    net.eval()
-    net = net.to(device)
+    net.load_checkpoint_from_path(ckpt_path, device=device, training=False)
     batch_size= 10
     if motion_file is None:
          #if noisy pose path not given, then generate random quaternions

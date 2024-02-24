@@ -53,6 +53,16 @@ class PoseNDF(torch.nn.Module):
             self.loss_l1 = torch.nn.L1Loss()
         elif self.loss == 'l2':
             self.loss_l1 = torch.nn.MSELoss()
+
+
+    def load_checkpoint_from_path(self, checkpoint_path, device, training=False):
+        checkpoint = torch.load(checkpoint_path, map_location='cpu')
+        self.load_state_dict(checkpoint['model_state_dict'])
+        if training:
+            self.train()
+        else:
+            self.eval()
+        self = self.to(device)
         
        
     def train(self, mode=True):

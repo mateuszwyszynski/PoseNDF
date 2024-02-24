@@ -16,4 +16,4 @@ amass_raw/
 amass_samples/
 training_data/
 posendf/
-smpl/
+smpl*/
