@@ -36,7 +36,7 @@ def gradient(inputs, outputs):
     return points_grad
 
 
-class SamplePose(object):
+class Projector(object):
     def __init__(self, posendf,  body_model, out_path='./experiment_results/sample_pose', debug=False, device='cuda:0', batch_size=1, gender='male'):
         self.debug = debug
         self.device = device
@@ -134,8 +134,8 @@ def sample_poses(config: Path, ckpt_path: Path, num_poses: int = 1, poses_file: 
     body_model = BodyModel(bm_path=bm_dir_path, model_type='smpl', batch_size=num_poses,  num_betas=10).to(device=device)
 
     # create Motion denoiser layer
-    pose_sampler = SamplePose(net, body_model=body_model, batch_size=num_poses, out_path=out_dir)
-    pose_sampler.project(noisy_poses)
+    projector = Projector(net, body_model=body_model, batch_size=num_poses, out_path=out_dir)
+    projector.project(noisy_poses)
 
 
 
