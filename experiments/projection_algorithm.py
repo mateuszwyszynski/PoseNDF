@@ -23,9 +23,7 @@ def gradient(inputs, outputs):
 
 
 class Projector(object):
-    def __init__(self, posendf, out_path='./experiment_results/sample_pose', debug=False, device='cuda:0'):
-        self.debug = debug
-        self.device = device
+    def __init__(self, posendf, out_path='./experiment_results/sample_pose'):
         self.pose_prior = posendf
         self.out_path = out_path
 
