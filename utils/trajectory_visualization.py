@@ -190,7 +190,7 @@ def make_gui_elements(
             "Distance to manifold",
             initial_value=0,
             disabled=True,
-            step=0.0001
+            step=0.000001
         )
 
         # Add playback UI.
