@@ -100,14 +100,14 @@ Pose-NDF is a continuous model for plausible human poses based on neural distanc
 
 ### Pose generation
 
-    python -m experiments.sample_poses --config={} --ckpt_path={} --noisy_pose={} --outpath_folder={}
+    python -m experiments.sample_poses --config={} --ckpt_path={} --noisy_poses={} --outpath_folder={}
 
 where:
 
  - `config`: path to the config file for the model.
  Be sure to use the model and configuration file that match,
  - `ckpt_path`: path to the checkpoint with a trained model,
- - `noisy_pose`: is a path to an `npz` file containing random poses in quaternions,
+ - `noisy_poses`: is a path to an `npz` file containing random poses in quaternions,
 Examples of such files can be found in the training data.
  - `outpath_folder`: where to save rendered initial and projected pose images.
 
@@ -116,7 +116,7 @@ outpath_folder: save rendered initial and projected pose.
 ### Pose interpolation
     python -m experiments.interpolation --config={} --ckpt_path={} --pose_file={}
 
-where parameters are the same as in _Pose generation_ with `pose_file` parameter being the equivalent of `noisy_pose` (no idea why...)
+where parameters are the same as in _Pose generation_ with `pose_file` parameter being the equivalent of `noisy_poses`.
 
 The `ipdb` package is used by this script.
 Basically:

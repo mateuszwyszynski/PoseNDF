@@ -112,29 +112,28 @@ class SamplePose(object):
         self.visualize(smpl_init.vertices, smpl_init.faces, self.out_path, device=self.device, joints=smpl_init.Jtr, render=True,prefix='out')
 
 
-def sample_pose(opt, ckpt_path, motion_file=None,gt_data=None, out_path=None):
+def sample_poses(opt, ckpt_path, num_poses=1, motion_file=None,gt_data=None, out_path=None):
     net = PoseNDF(opt)
     device= 'cuda:0'
     net.load_checkpoint_from_path(ckpt_path, device=device, training=False)
-    batch_size= 10
     if motion_file is None:
          #if noisy pose path not given, then generate random quaternions
-        noisy_pose = torch.rand((batch_size,21,4))
-        noisy_pose = torch.nn.functional.normalize(noisy_pose,dim=2).to(device=device)
+        noisy_poses = torch.rand((num_poses,21,4))
+        noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=2).to(device=device)
     else:
-        noisy_pose = np.load(motion_file)['pose']
+        noisy_poses = np.load(motion_file)['pose']
         #randomly slect according to batch size
-        subsample_indices = np.random.randint(0, len(noisy_pose), batch_size)
-        noisy_pose = noisy_pose[subsample_indices]
+        subsample_indices = np.random.randint(0, len(noisy_poses), num_poses)
+        noisy_poses = noisy_poses[subsample_indices]
         #apply flip
-        noisy_pose = torch.from_numpy(noisy_pose.astype(np.float32)).to(device=device)
+        noisy_poses = torch.from_numpy(noisy_poses.astype(np.float32)).to(device=device)
     #  load body model
     bm_dir_path = 'smpl/models'
-    body_model = BodyModel(bm_path=bm_dir_path, model_type='smpl', batch_size=batch_size,  num_betas=10).to(device=device)
+    body_model = BodyModel(bm_path=bm_dir_path, model_type='smpl', batch_size=num_poses,  num_betas=10).to(device=device)
 
     # create Motion denoiser layer
-    pose_sampler = SamplePose(net, body_model=body_model, batch_size=batch_size, out_path=out_path)
-    pose_sampler.project(noisy_pose)
+    pose_sampler = SamplePose(net, body_model=body_model, batch_size=num_poses, out_path=out_path)
+    pose_sampler.project(noisy_poses)
 
 
 
@@ -144,10 +143,10 @@ if __name__ == '__main__':
     )
     parser.add_argument('--config', '-c', default='posendf/version2/config.yaml', type=str, help='Path to config file.')
     parser.add_argument('--ckpt_path', '-ckpt', default='posendf/version2/checkpoint_epoch_best.tar', type=str, help='Path to pretrained model.')
-    parser.add_argument('--noisy_pose', '-np', nargs='?', type=str, const='training_data/ACCAD/Female1General_c3d.npz', help='Path to noisy motion file')
+    parser.add_argument('--noisy_poses', '-np', nargs='?', type=str, const='training_data/ACCAD/Female1General_c3d.npz', help='Path to noisy motion file')
     parser.add_argument('--outpath_folder', '-out', default='posendf/version2', type=str, help='Path to output')
     args = parser.parse_args()
 
     opt = load_config(args.config)
     print(args.ckpt_path)
-    sample_pose(opt, args.ckpt_path, motion_file=args.noisy_pose, out_path=args.outpath_folder)
+    sample_poses(opt, args.ckpt_path, num_poses=10, motion_file=args.noisy_poses, out_path=args.outpath_folder)
