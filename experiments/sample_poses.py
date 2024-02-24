@@ -41,10 +41,10 @@ def sample_poses(config: Path, ckpt_path: Path, num_poses: int = 1, poses_file: 
 
     # create Motion denoiser layer
     projector = Projector(net, out_path=out_dir)
-    noisy_poses_axis_angle = projector.project(noisy_poses)
+    projected_poses_axis_angle = projector.project(noisy_poses)
 
     # render final poses
-    smpl_init = body_model(betas=betas, pose_body=noisy_poses_axis_angle.view(-1, 69))
+    smpl_init = body_model(betas=betas, pose_body=projected_poses_axis_angle.view(-1, 69))
     visualize(smpl_init.vertices, smpl_init.faces, out_dir, device=device, render=True, prefix='out')
 
 
