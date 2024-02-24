@@ -69,12 +69,6 @@ class Projector(object):
         noisy_poses = noisy_poses.detach()
         noisy_poses.requires_grad = True
 
-        # print(torch.mean(net_pred['dist_pred']))
-        # grad = gradient(noisy_poses, net_pred['dist_pred']).reshape(-1, 84)
-        # grad_norm = torch.nn.functional.normalize(grad, p=2.0, dim=-1)
-        # noisy_poses = noisy_poses - (net_pred['dist_pred']*grad_norm).reshape(-1, 21,4)
-        # noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=-1
-
         return noisy_poses
 
 
