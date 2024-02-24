@@ -8,7 +8,6 @@ import tyro
 
 from configs.config import load_config
 from experiments.body_model import BodyModel
-from experiments.projection_algorithm import Projector
 from experiments.exp_utils import renderer
 from model.posendf import PoseNDF
 
@@ -18,9 +17,9 @@ def sample_poses(
         num_poses: int = 1, poses_file: Path = None, render: bool = False, save_projection_steps: bool = False
         ):
     opt = load_config(os.path.join(experiment_dir, config))
-    net = PoseNDF(opt)
+    posendf = PoseNDF(opt)
     device= 'cuda:0'
-    net.load_checkpoint_from_path(os.path.join(experiment_dir, ckpt_path), device=device, training=False)
+    posendf.load_checkpoint_from_path(os.path.join(experiment_dir, ckpt_path), device=device, training=False)
     if poses_file is None:
          #if noisy pose path not given, then generate random quaternions
         noisy_poses = torch.rand((num_poses,21,4))
@@ -45,8 +44,7 @@ def sample_poses(
         renderer(smpl_init.vertices, smpl_init.faces, experiment_dir, device=device, prefix='init')
 
     # create Motion denoiser layer
-    projector = Projector(net, out_path=experiment_dir)
-    projected_poses = projector.project(noisy_poses, save_projection_steps=save_projection_steps)
+    projected_poses = posendf.project(noisy_poses, save_projection_steps=save_projection_steps)
 
     # render final poses
     if render:

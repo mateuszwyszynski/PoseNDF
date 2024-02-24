@@ -9,6 +9,7 @@ import torch.nn as nn
 import ipdb
 #todo: create a base trainer
 from model.network.net_modules import  StructureEncoder, DFNet
+from experiments.exp_utils import quat_flip
 
 import time
 import pickle as pkl
@@ -53,6 +54,8 @@ class PoseNDF(torch.nn.Module):
             self.loss_l1 = torch.nn.L1Loss()
         elif self.loss == 'l2':
             self.loss_l1 = torch.nn.MSELoss()
+
+        self.experiment_dir = opt['experiment']['root_dir']
 
 
     def load_checkpoint_from_path(self, checkpoint_path, device, training=False):
@@ -99,6 +102,43 @@ class PoseNDF(torch.nn.Module):
             return loss, {'dist': loss,  'man_loss': loss_man }
         else:
             return {'dist_pred': dist_pred}
-            
 
 
+    def projection_step(self, poses):
+        net_pred = self(poses, train=False)
+        grad_val = gradient(poses, net_pred['dist_pred']).reshape(-1, 84)
+        poses = poses.detach()
+        net_pred['dist_pred'] = net_pred['dist_pred'].detach()
+        grad_norm = torch.nn.functional.normalize(grad_val, p=2.0, dim=-1)
+        poses = poses - (net_pred['dist_pred']*grad_norm).reshape(-1, 21,4)
+        poses, _ = quat_flip(poses)
+        poses = torch.nn.functional.normalize(poses,dim=-1)
+        poses = poses.detach()
+        poses.requires_grad = True
+
+        return poses
+
+
+    def project(self, poses, iterations=100, save_projection_steps=True):
+        poses, _ = quat_flip(poses)
+        poses = torch.nn.functional.normalize(poses,dim=-1)
+
+        poses.requires_grad = True
+
+        if save_projection_steps:
+            projection_steps_path = os.path.join(self.experiment_dir, 'projection_steps')
+            os.makedirs(projection_steps_path, exist_ok=True)
+            batch_size, _, _ = poses.shape
+            projection_steps = torch.detach(poses).reshape(batch_size, 1, -1, 4)
+
+        for _ in range(iterations):
+            poses = self.projection_step(poses)
+
+            if save_projection_steps:
+                projection_steps = torch.cat((projection_steps, poses.reshape(batch_size, 1, -1, 4)), dim=1)
+
+        if save_projection_steps:
+            for motion_ind in range(batch_size):
+                np.savez(os.path.join(projection_steps_path, f'{motion_ind}.npz'), pose_body=np.array(projection_steps[motion_ind].cpu().detach().numpy()))
+
+        return poses
