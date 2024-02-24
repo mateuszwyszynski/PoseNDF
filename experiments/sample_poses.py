@@ -8,7 +8,7 @@ import tyro
 from configs.config import load_config
 from experiments.body_model import BodyModel
 from experiments.projection_algorithm import Projector
-from experiments.exp_utils import visualize
+from experiments.exp_utils import renderer
 from model.posendf import PoseNDF
 
 
@@ -41,7 +41,7 @@ def sample_poses(
         noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=device)
         noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
         smpl_init = body_model(betas=betas, pose_body=noisy_poses_axis_angle.view(-1, 69))
-        visualize(smpl_init.vertices, smpl_init.faces, out_dir, device=device, prefix='init')
+        renderer(smpl_init.vertices, smpl_init.faces, out_dir, device=device, prefix='init')
 
     # create Motion denoiser layer
     projector = Projector(net, out_path=out_dir)
@@ -50,7 +50,7 @@ def sample_poses(
     # render final poses
     if render:
         smpl_init = body_model(betas=betas, pose_body=projected_poses_axis_angle.view(-1, 69))
-        visualize(smpl_init.vertices, smpl_init.faces, out_dir, device=device, prefix='out')
+        renderer(smpl_init.vertices, smpl_init.faces, out_dir, device=device, prefix='out')
 
 
 if __name__ == '__main__':
