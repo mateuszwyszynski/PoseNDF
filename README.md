@@ -173,6 +173,7 @@ Currently these are saved inside the current experiment directory inside the `pr
 With this file ready, you can run:
 
     python -m utils.trajecotry_visualization --model-path={} --poses-path={}
+    python -m utils.trajectory_visualization --model-path={} --poses-path={} --checkpoint-path={} --config={}
 
 where:
 
@@ -180,9 +181,22 @@ where:
  Note that this should be the `smplx` not `smpl` model.
  In theory you can use also other models by specifying `--model-type` but for some reason `smpl` model does not work.
  More on that in [this issue](https://github.com/mateuszwyszynski/PoseNDF/issues/8)
- - `--poses-path` is the path to the `npz` file with saved poses. E.g. `'posendf/version2/projection_steps/9.npz'`
+ - `--poses-path` is the path to the `npz` file with saved poses.
+ E.g. `'posendf/version2/projection_steps/9.npz'`
+ - `--checkpoint-path` is the path to the checkpoint with a PoseNDF model, i.e. the network approximating the UDF.
+ E.g. `'posendf/replicate-version2/checkpoint_epoch_best.tar'`
+ - `--config` is the path to the configuration file for the PoseNDF model.
+ E.g. `'posendf/replicate-version2/config.yaml'`
 
-Open the link presented by the CLI in a browser and click on "Play animation".
+Open the link presented by the CLI in a browser.
+You can play the animation in a loop, control the pose index with a slider or next / previous pose buttons.
+
+Note that there is a read only field which shows the distance to the manifold for the current pose.
+
+### AMASS raw
+
+Similarly as in the paragraph above, you can visualize movement in the raw AMASS data.
+You just have to specify a different `--poses-path`.
 
 
 ### Citation:
