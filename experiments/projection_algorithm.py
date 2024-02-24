@@ -9,7 +9,7 @@ from pytorch3d.io import save_obj
 import torch
 from torch.autograd import grad
 
-from experiments.exp_utils import renderer, quat_flip
+from experiments.exp_utils import quat_flip, visualize
 
 
 def gradient(inputs, outputs):
@@ -25,24 +25,12 @@ def gradient(inputs, outputs):
 
 
 class Projector(object):
-    def __init__(self, posendf, body_model, out_path='./experiment_results/sample_pose', debug=False, device='cuda:0', batch_size=1):
+    def __init__(self, posendf, out_path='./experiment_results/sample_pose', debug=False, device='cuda:0'):
         self.debug = debug
         self.device = device
         self.pose_prior = posendf
-        self.body_model = body_model
         self.out_path = out_path
-        self.betas = torch.zeros((batch_size,10)).to(device=self.device)  #for visualization
-    
-    @staticmethod
-    def visualize(vertices, faces, out_path, device, render=False, prefix='out', save_mesh=False):
-        # save meshes and rendered results if needed
-        os.makedirs(out_path,exist_ok=True)
-        if save_mesh:
-            os.makedirs( os.path.join(out_path, 'meshes'), exist_ok=True)
-            [save_obj(os.path.join(out_path, 'meshes', '{}_{:04}.obj'.format(prefix,i) ), vertices[i], faces) for i in range(len(vertices))]
 
-        if render:
-            renderer(vertices, faces, out_path, device=device,  prefix=prefix)
 
     def projection_step(self, noisy_poses):
         net_pred = self.pose_prior(noisy_poses, train=False)
@@ -64,8 +52,6 @@ class Projector(object):
         # create initial SMPL joints and vertices for visualition(to be used for data term)
         noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
         noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
-        smpl_init = self.body_model(betas=self.betas, pose_body=noisy_poses_axis_angle.view(-1, 69))
-        self.visualize(smpl_init.vertices, smpl_init.faces, self.out_path, device=self.device, joints=smpl_init.Jtr, render=True, prefix='init')
 
         noisy_poses, _ = quat_flip(noisy_poses)
         noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=-1)
@@ -91,5 +77,5 @@ class Projector(object):
         # create final results
         noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
         noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
-        smpl_init = self.body_model(betas=self.betas, pose_body=noisy_poses_axis_angle.view(-1, 69))
-        self.visualize(smpl_init.vertices, smpl_init.faces, self.out_path, device=self.device, joints=smpl_init.Jtr, render=True,prefix='out')
+
+        return noisy_poses_axis_angle

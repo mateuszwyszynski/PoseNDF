@@ -1,12 +1,14 @@
 """Sample poses from manifold"""
 import numpy as np
 from pathlib import Path
+from pytorch3d.transforms import quaternion_to_axis_angle
 import torch
 import tyro
 
 from configs.config import load_config
 from experiments.body_model import BodyModel
 from experiments.projection_algorithm import Projector
+from experiments.exp_utils import visualize
 from model.posendf import PoseNDF
 
 
@@ -30,9 +32,20 @@ def sample_poses(config: Path, ckpt_path: Path, num_poses: int = 1, poses_file: 
     bm_dir_path = 'smpl/models'
     body_model = BodyModel(bm_path=bm_dir_path, model_type='smpl', batch_size=num_poses,  num_betas=10).to(device=device)
 
+    # render initial noisy poses
+    betas = torch.zeros((num_poses, 10)).to(device=device)
+    noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=device)
+    noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
+    smpl_init = body_model(betas=betas, pose_body=noisy_poses_axis_angle.view(-1, 69))
+    visualize(smpl_init.vertices, smpl_init.faces, out_dir, device=device, render=True, prefix='init')
+
     # create Motion denoiser layer
-    projector = Projector(net, body_model=body_model, batch_size=num_poses, out_path=out_dir)
-    projector.project(noisy_poses)
+    projector = Projector(net, out_path=out_dir)
+    noisy_poses_axis_angle = projector.project(noisy_poses)
+
+    # render final poses
+    smpl_init = body_model(betas=betas, pose_body=noisy_poses_axis_angle.view(-1, 69))
+    visualize(smpl_init.vertices, smpl_init.faces, out_dir, device=device, render=True, prefix='out')
 
 
 if __name__ == '__main__':
