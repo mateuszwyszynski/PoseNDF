@@ -71,8 +71,9 @@ class Projector(object):
                 noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
                 projection_steps = torch.cat((projection_steps, noisy_poses_axis_angle.reshape(batch_size, 1, -1)), dim=1)
 
-        for motion_ind in range(batch_size):
-            np.savez(os.path.join(projection_steps_path, f'{motion_ind}.npz'), pose_body=np.array(projection_steps[motion_ind].cpu().detach().numpy()))
+        if save_projection_steps:
+            for motion_ind in range(batch_size):
+                np.savez(os.path.join(projection_steps_path, f'{motion_ind}.npz'), pose_body=np.array(projection_steps[motion_ind].cpu().detach().numpy()))
 
         # create final results
         noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
