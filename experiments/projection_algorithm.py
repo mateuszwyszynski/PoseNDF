@@ -25,7 +25,7 @@ def gradient(inputs, outputs):
 
 
 class Projector(object):
-    def __init__(self, posendf, body_model, out_path='./experiment_results/sample_pose', debug=False, device='cuda:0', batch_size=1, gender='male'):
+    def __init__(self, posendf, body_model, out_path='./experiment_results/sample_pose', debug=False, device='cuda:0', batch_size=1):
         self.debug = debug
         self.device = device
         self.pose_prior = posendf
@@ -34,7 +34,7 @@ class Projector(object):
         self.betas = torch.zeros((batch_size,10)).to(device=self.device)  #for visualization
     
     @staticmethod
-    def visualize(vertices, faces, out_path, device, joints=None, render=False, prefix='out', save_mesh=False):
+    def visualize(vertices, faces, out_path, device, render=False, prefix='out', save_mesh=False):
         # save meshes and rendered results if needed
         os.makedirs(out_path,exist_ok=True)
         if save_mesh:
