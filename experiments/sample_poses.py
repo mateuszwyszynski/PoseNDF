@@ -45,10 +45,12 @@ def sample_poses(
 
     # create Motion denoiser layer
     projector = Projector(net, out_path=out_dir)
-    projected_poses_axis_angle = projector.project(noisy_poses, save_projection_steps=save_projection_steps)
+    projected_poses = projector.project(noisy_poses, save_projection_steps=save_projection_steps)
 
     # render final poses
     if render:
+        projected_poses_axis_angle = torch.zeros((len(projected_poses), 23, 3)).to(device=device)
+        projected_poses_axis_angle[:, :21] = quaternion_to_axis_angle(projected_poses)
         smpl_init = body_model(betas=betas, pose_body=projected_poses_axis_angle.view(-1, 69))
         renderer(smpl_init.vertices, smpl_init.faces, out_dir, device=device, prefix='out')
 

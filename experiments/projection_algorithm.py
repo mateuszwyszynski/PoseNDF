@@ -4,7 +4,6 @@ Projection algorithm for projecting onto the manifold of plausible poses.
 
 import numpy as np
 import os
-from pytorch3d.transforms import quaternion_to_axis_angle
 import torch
 from torch.autograd import grad
 
@@ -48,10 +47,6 @@ class Projector(object):
 
 
     def project(self, noisy_poses, iterations=100, save_projection_steps=True):
-        # create initial SMPL joints and vertices for visualition(to be used for data term)
-        noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
-        noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
-
         noisy_poses, _ = quat_flip(noisy_poses)
         noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=-1)
 
@@ -60,22 +55,17 @@ class Projector(object):
         if save_projection_steps:
             projection_steps_path = os.path.join(self.out_path, 'projection_steps')
             os.makedirs(projection_steps_path, exist_ok=True)
-            batch_size, _, _ = noisy_poses_axis_angle.shape
-            projection_steps = torch.detach(noisy_poses_axis_angle).reshape(batch_size, 1, -1)
+            batch_size, _, _ = noisy_poses.shape
+            projection_steps = torch.detach(noisy_poses).reshape(batch_size, 1, -1, 4)
         
         for _ in range(iterations):
             noisy_poses = self.projection_step(noisy_poses)
 
             if save_projection_steps:
-                noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
-                projection_steps = torch.cat((projection_steps, noisy_poses_axis_angle.reshape(batch_size, 1, -1)), dim=1)
+                projection_steps = torch.cat((projection_steps, noisy_poses.reshape(batch_size, 1, -1, 4)), dim=1)
 
         if save_projection_steps:
             for motion_ind in range(batch_size):
                 np.savez(os.path.join(projection_steps_path, f'{motion_ind}.npz'), pose_body=np.array(projection_steps[motion_ind].cpu().detach().numpy()))
 
-        # create final results
-        noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=self.device)
-        noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
-
-        return noisy_poses_axis_angle
+        return noisy_poses
