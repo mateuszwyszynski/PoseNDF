@@ -128,23 +128,23 @@ where:
  If the flag is missing nothing is saved.
         
 ### Pose interpolation
-    python -m experiments.interpolation --config={} --ckpt_path={} --pose_file={}
+    python -m experiments.interpolation --config={} --ckpt={} --num-iter={} --step-size={} --poses_file={}
 
-where parameters are the same as in _Pose generation_ with `pose_file` parameter being the equivalent of `noisy_poses`.
+where:
 
-The `ipdb` package is used by this script.
-Basically:
- - type `n` and press `Enter` to execute the next line
- - or type `c` and press Enter to execute until the next breaking point
-
-More info how to use IPDB can be found [here](https://www.geeksforgeeks.org/using-ipdb-to-debug-python-code/) or [here](https://wangchuan.github.io/coding/2017/07/12/ipdb-cheat-sheet.html)
-
-TODO:
-1. Most likely we do not want to rely on IPDB.
-Not intuitive and badly documented.
-2. More importantly, I believe there is no code which actually performs pose interpolation.
-The `experiments/interpolation.py` script simply generates two poses and that's all.
-I'm pretty sure that nothing else happens, but I will confirm when I have a really good understanding of the code.
+ - `--config` (optional): a path to the config file for the model.
+ Be sure to use the model and configuration file that match.
+ Default is `'posendf/replicate-version2/config.yaml'`
+ - `--ckpt` (optional): a path to the checkpoint with a trained model.
+ Default is `'posendf/replicate-version2/checkpoint_epoch_best.tar'`
+ - `--num-iter` (optional): how many interpolation steps will be performed
+ - `--step-size` (optional): what step size should be used.
+ Default is 0.1.
+ - `--poses-file` (optional): a path to an `npz` file containing poses (potentially with some noise).
+ The poses should be represented with quaternions.
+ Examples of such files can be found in the training data.
+ The first and the last pose in the data are taken as the poses to interpolate between.
+ If no file is provided, joint values for both poses are initialized randomly.
 
 ### Motion denoising
 
