@@ -5,11 +5,10 @@ Projection algorithm for projecting onto the manifold of plausible poses.
 import numpy as np
 import os
 from pytorch3d.transforms import quaternion_to_axis_angle
-from pytorch3d.io import save_obj
 import torch
 from torch.autograd import grad
 
-from experiments.exp_utils import quat_flip, visualize
+from experiments.exp_utils import quat_flip
 
 
 def gradient(inputs, outputs):
