@@ -87,15 +87,15 @@ class Projector(object):
         if save_projection_steps:
             projection_steps_path = os.path.join(self.out_path, 'projection_steps')
             os.makedirs(projection_steps_path, exist_ok=True)
-            batch_size, num_joints, angles = noisy_poses_axis_angle.shape
-            projection_steps = torch.detach(noisy_poses_axis_angle).reshape(batch_size, 1, num_joints*angles)
+            batch_size, _, _ = noisy_poses_axis_angle.shape
+            projection_steps = torch.detach(noisy_poses_axis_angle).reshape(batch_size, 1, -1)
         
         for _ in range(iterations):
             noisy_poses = self.projection_step(noisy_poses)
 
             if save_projection_steps:
                 noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
-                projection_steps = torch.cat((projection_steps, noisy_poses_axis_angle.reshape(batch_size, 1, num_joints*angles)), dim=1)
+                projection_steps = torch.cat((projection_steps, noisy_poses_axis_angle.reshape(batch_size, 1, -1)), dim=1)
 
         for motion_ind in range(batch_size):
             np.savez(os.path.join(projection_steps_path, f'{motion_ind}.npz'), pose_body=np.array(projection_steps[motion_ind].cpu().detach().numpy()))
