@@ -107,7 +107,7 @@ A pose is generated in two steps:
 
 You can generate random plausible poses with:
 
-    python -m experiments.sample_poses --config={} --ckpt-path={} --num-poses={} --poses-file={} --out-dir={}
+    python -m experiments.sample_poses --config={} --ckpt-path={} --num-poses={} --poses-file={} --out-dir={} --render --save-projection-steps
 
 where:
 
@@ -121,6 +121,10 @@ where:
  Examples of such files can be found in the training data.
  If no file is provided, joint values for each pose are initialized randomly.
  - `--out-dir`: where the poses generated during projection steps should be saved
+ - `--render`: whether to render the initial random poses and the projected poses.
+ If the flag is missing nothing is rendered.
+ - `--save-projections-steps`: whether to save an `.npz` file with poses obtained in each step of the projection algorithm.
+ If the flag is missing nothing is saved.
         
 ### Pose interpolation
     python -m experiments.interpolation --config={} --ckpt_path={} --pose_file={}
