@@ -88,7 +88,7 @@ class Projector(object):
             projection_steps_path = os.path.join(self.out_path, 'projection_steps')
             os.makedirs(projection_steps_path, exist_ok=True)
             batch_size, num_joints, angles = noisy_poses_axis_angle.shape
-            projection_steps = torch.clone(noisy_poses_axis_angle).reshape(batch_size, 1, num_joints*angles)
+            projection_steps = torch.detach(noisy_poses_axis_angle).reshape(batch_size, 1, num_joints*angles)
         
         for _ in range(iterations):
             noisy_poses = self.projection_step(noisy_poses)
