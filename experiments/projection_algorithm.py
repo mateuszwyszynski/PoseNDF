@@ -35,7 +35,6 @@ class Projector(object):
         grad_val = gradient(poses, net_pred['dist_pred']).reshape(-1, 84)
         poses = poses.detach()
         net_pred['dist_pred'] = net_pred['dist_pred'].detach()
-        print(torch.mean(net_pred['dist_pred']))
         grad_norm = torch.nn.functional.normalize(grad_val, p=2.0, dim=-1)
         poses = poses - (net_pred['dist_pred']*grad_norm).reshape(-1, 21,4)
         poses, _ = quat_flip(poses)
