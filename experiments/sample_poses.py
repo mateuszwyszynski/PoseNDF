@@ -29,11 +29,10 @@ def sample_poses(
         noisy_poses = noisy_poses[subsample_indices]
         noisy_poses = torch.from_numpy(noisy_poses.astype(np.float32)).to(device=device)
 
-    bm_dir_path = 'smpl/models'
-    body_model = BodyModel(bm_path=bm_dir_path, model_type='smpl', batch_size=num_poses,  num_betas=10).to(device=device)
-
     # render initial noisy poses
     if render:
+        bm_dir_path = 'smpl/models'
+        body_model = BodyModel(bm_path=bm_dir_path, model_type='smpl', batch_size=num_poses,  num_betas=10).to(device=device)
         betas = torch.zeros((num_poses, 10)).to(device=device)
         noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=device)
         noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
