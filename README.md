@@ -128,16 +128,16 @@ where:
  If the flag is missing nothing is saved.
         
 ### Pose interpolation
-    python -m experiments.interpolation --config={} --ckpt={} --num-iter={} --step-size={} --poses_file={}
+    python -m experiments.interpolation --experiment-dir={}--config={} --ckpt-path={} --num-steps={} --step-size={} --poses_file={} --save-projection-steps
 
 where:
 
- - `--config` (optional): a path to the config file for the model.
+ - `--experiment-dir`: directory where the checkpoint and config files are stored.
+ The results, if appropriate flags are present, will also be saved under this directory.
+ - `--config` (optional): relative path (w.r.t `--experiment-dir`) to the config file for the model.
  Be sure to use the model and configuration file that match.
- Default is `'posendf/replicate-version2/config.yaml'`
- - `--ckpt` (optional): a path to the checkpoint with a trained model.
- Default is `'posendf/replicate-version2/checkpoint_epoch_best.tar'`
- - `--num-iter` (optional): how many interpolation steps will be performed
+ - `--ckpt-path`: relative path (w.r.t `--experiment-dir`) to the checkpoint with a trained model,
+ - `--num-steps` (optional): how many interpolation steps will be performed
  - `--step-size` (optional): what step size should be used.
  Default is 0.1.
  - `--poses-file` (optional): a path to an `npz` file containing poses (potentially with some noise).

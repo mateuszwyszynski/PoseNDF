@@ -14,17 +14,13 @@ import tyro
 
 
 def main(
-        config: str = 'posendf/replicate-version2/config.yaml',
-        ckpt: str = 'posendf/replicate-version2/checkpoint_epoch_best.tar',
-        num_iter: int = 20, step_size: float = 0.1, poses_file: str = None, save_interpolation_steps: bool = False
+        experiment_dir: str = None, config: str = 'config.yaml', ckpt_path: str = 'checkpoint_epoch_best.tar', poses_file: str = None,
+        num_steps: int = 20, step_size: float = 0.1, save_interpolation_steps: bool = False
         ) -> None:
-    opt = load_config(config)
+    opt = load_config(os.path.join(experiment_dir, config))
     posendf = PoseNDF(opt)
     device= 'cuda:0'
-    ckpt = torch.load(ckpt, map_location='cpu')['model_state_dict']
-    posendf.load_state_dict(ckpt)
-    posendf.eval()
-    posendf = posendf.to(device)
+    posendf.load_checkpoint_from_path(os.path.join(experiment_dir, ckpt_path), device=device, training=False)
 
     if poses_file is None:
         pose1 = np.random.rand(21,4).astype(np.float32)
@@ -40,8 +36,7 @@ def main(
     pose1 = posendf.project(pose1.to(device))
     pose2 = posendf.project(pose2.to(device))
 
-    posendf.interpolate(pose1, pose2, num_iter, step_size, save_interpolation_steps=save_interpolation_steps)
-
+    posendf.interpolate(pose1, pose2, num_steps, step_size, save_interpolation_steps=save_interpolation_steps)
 
 
 if __name__ == '__main__':
