@@ -21,17 +21,14 @@ def sample_poses(
     device= 'cuda:0'
     posendf.load_checkpoint_from_path(os.path.join(posendf.experiment_dir, ckpt_path), device=device, training=False)
     if poses_file is None:
-         #if noisy pose path not given, then generate random quaternions
         noisy_poses = torch.rand((num_poses,21,4))
         noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=2).to(device=device)
     else:
         noisy_poses = np.load(poses_file)['pose']
-        #randomly slect according to batch size
         subsample_indices = np.random.randint(0, len(noisy_poses), num_poses)
         noisy_poses = noisy_poses[subsample_indices]
-        #apply flip
         noisy_poses = torch.from_numpy(noisy_poses.astype(np.float32)).to(device=device)
-    #  load body model
+
     bm_dir_path = 'smpl/models'
     body_model = BodyModel(bm_path=bm_dir_path, model_type='smpl', batch_size=num_poses,  num_betas=10).to(device=device)
 
@@ -43,7 +40,6 @@ def sample_poses(
         smpl_init = body_model(betas=betas, pose_body=noisy_poses_axis_angle.view(-1, 69))
         renderer(smpl_init.vertices, smpl_init.faces, experiment_dir, device=device, prefix='init')
 
-    # create Motion denoiser layer
     projected_poses = posendf.project(noisy_poses, save_projection_steps=save_projection_steps)
 
     # render final poses
