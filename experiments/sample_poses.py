@@ -37,7 +37,7 @@ def sample_poses(
         noisy_poses_axis_angle = torch.zeros((len(noisy_poses), 23, 3)).to(device=device)
         noisy_poses_axis_angle[:, :21] = quaternion_to_axis_angle(noisy_poses)
         smpl_init = body_model(betas=betas, pose_body=noisy_poses_axis_angle.view(-1, 69))
-        renderer(smpl_init.vertices, smpl_init.faces, experiment_dir, device=device, prefix='init')
+        renderer(smpl_init.vertices, smpl_init.faces, posendf.experiment_dir, device=device, prefix='init')
 
     projected_poses = posendf.project(noisy_poses, save_projection_steps=save_projection_steps)
 
@@ -46,7 +46,7 @@ def sample_poses(
         projected_poses_axis_angle = torch.zeros((len(projected_poses), 23, 3)).to(device=device)
         projected_poses_axis_angle[:, :21] = quaternion_to_axis_angle(projected_poses)
         smpl_init = body_model(betas=betas, pose_body=projected_poses_axis_angle.view(-1, 69))
-        renderer(smpl_init.vertices, smpl_init.faces, experiment_dir, device=device, prefix='out')
+        renderer(smpl_init.vertices, smpl_init.faces, posendf.experiment_dir, device=device, prefix='out')
 
 
 if __name__ == '__main__':
