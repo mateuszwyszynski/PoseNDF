@@ -142,3 +142,17 @@ class PoseNDF(torch.nn.Module):
                 np.savez(os.path.join(projection_steps_path, f'{motion_ind}.npz'), pose_body=np.array(projection_steps[motion_ind].cpu().detach().numpy()))
 
         return poses
+
+    def interpolate(self, start_pose, end_pose, num_iter=20, step_size=0.1, save_interpolation_steps=True):
+        interpolation_steps = torch.detach(start_pose).reshape(1, -1, 4)
+        for _ in range(num_iter):
+            pose = (1-step_size)*start_pose + step_size*end_pose
+            start_pose = self.projection_step(pose)
+            interpolation_steps = torch.cat((interpolation_steps, start_pose.reshape(1, -1, 4)), dim=0)
+
+        if save_interpolation_steps:
+            interpolation_steps_path = os.path.join(self.experiment_dir, 'interpolation_steps')
+            os.makedirs(interpolation_steps_path, exist_ok=True)
+            np.savez(os.path.join(interpolation_steps_path, 'interpolation.npz'), pose_body=np.array(interpolation_steps.cpu().detach().numpy()))
+
+        return interpolation_steps

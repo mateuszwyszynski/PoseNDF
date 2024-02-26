@@ -141,10 +141,11 @@ where:
  - `--step-size` (optional): what step size should be used.
  Default is 0.1.
  - `--poses-file` (optional): a path to an `npz` file containing poses (potentially with some noise).
+ - `--save-interpolation-steps` (optional): whether to save an `.npz` file with poses obtained in each step of the interpolation algorithm.
  The poses should be represented with quaternions.
  Examples of such files can be found in the training data.
  The first and the last pose in the data are taken as the poses to interpolate between.
- If no file is provided, joint values for both poses are initialized randomly.
+ If no file with poses is provided, joint values for both the start and the end pose are initialized randomly.
 
 ### Motion denoising
 

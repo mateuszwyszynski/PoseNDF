@@ -12,10 +12,11 @@ import numpy as np
 import os
 import tyro
 
+
 def main(
         config: str = 'posendf/replicate-version2/config.yaml',
         ckpt: str = 'posendf/replicate-version2/checkpoint_epoch_best.tar',
-        num_iter: int = 20, step_size: float = 0.1, poses_file: str = None
+        num_iter: int = 20, step_size: float = 0.1, poses_file: str = None, save_interpolation_steps: bool = False
         ) -> None:
     opt = load_config(config)
     posendf = PoseNDF(opt)
@@ -39,16 +40,7 @@ def main(
     pose1 = posendf.project(pose1.to(device))
     pose2 = posendf.project(pose2.to(device))
 
-    interpolation_steps_path = os.path.join(opt['experiment']['root_dir'], 'interpolation_steps')
-    os.makedirs(interpolation_steps_path, exist_ok=True)
-    interpolation_steps = torch.detach(pose1).reshape(1, -1, 4)
-
-    for _ in range(num_iter):
-        pose = (1-step_size)*pose1 + step_size*pose2
-        pose1 = posendf.project(torch.detach(pose))
-        interpolation_steps = torch.cat((interpolation_steps, pose1.reshape(1, -1, 4)), dim=0)
-
-    np.savez(os.path.join(interpolation_steps_path, 'interpolation.npz'), pose_body=np.array(interpolation_steps.cpu().detach().numpy()))
+    posendf.interpolate(pose1, pose2, num_iter, step_size, save_interpolation_steps=save_interpolation_steps)
 
 
 
