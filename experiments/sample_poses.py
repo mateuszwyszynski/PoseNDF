@@ -13,13 +13,13 @@ from model.posendf import PoseNDF
 
 
 def sample_poses(
-        experiment_dir: Path = None, config: str = 'config.yaml', ckpt_path: str = 'checkpoint_epoch_best.tar',
+        config: str = 'config.yaml', ckpt_path: str = 'checkpoint_epoch_best.tar',
         num_poses: int = 1, poses_file: Path = None, render: bool = False, save_projection_steps: bool = False
         ):
-    opt = load_config(os.path.join(experiment_dir, config))
+    opt = load_config(config)
     posendf = PoseNDF(opt)
     device= 'cuda:0'
-    posendf.load_checkpoint_from_path(os.path.join(experiment_dir, ckpt_path), device=device, training=False)
+    posendf.load_checkpoint_from_path(os.path.join(posendf.experiment_dir, ckpt_path), device=device, training=False)
     if poses_file is None:
          #if noisy pose path not given, then generate random quaternions
         noisy_poses = torch.rand((num_poses,21,4))

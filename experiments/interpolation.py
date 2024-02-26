@@ -14,13 +14,13 @@ import tyro
 
 
 def main(
-        experiment_dir: str = None, config: str = 'config.yaml', ckpt_path: str = 'checkpoint_epoch_best.tar', poses_file: str = None,
+        config: str = 'config.yaml', ckpt_path: str = 'checkpoint_epoch_best.tar', poses_file: str = None,
         num_steps: int = 20, step_size: float = 0.1, save_interpolation_steps: bool = False
         ) -> None:
-    opt = load_config(os.path.join(experiment_dir, config))
+    opt = load_config(config)
     posendf = PoseNDF(opt)
     device= 'cuda:0'
-    posendf.load_checkpoint_from_path(os.path.join(experiment_dir, ckpt_path), device=device, training=False)
+    posendf.load_checkpoint_from_path(os.path.join(posendf.experiment_dir, ckpt_path), device=device, training=False)
 
     if poses_file is None:
         pose1 = np.random.rand(21,4).astype(np.float32)

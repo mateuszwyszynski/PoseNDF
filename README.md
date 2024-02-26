@@ -107,15 +107,14 @@ A pose is generated in two steps:
 
 You can generate random plausible poses with:
 
-    python -m experiments.sample_poses --experiment-dir={}--config={} --ckpt-path={} --num-poses={} --poses-file={} --render --save-projection-steps
+    python -m experiments.sample_poses --config={} --ckpt-path={} --num-poses={} --poses-file={} --render --save-projection-steps
 
 where:
 
- - `--experiment-dir`: directory where the checkpoint and config files are stored.
- The results, if appropriate flags are present, will also be saved under this directory.
- - `--config` (optional): relative path (w.r.t `--experiment-dir`) to the config file for the model.
- Be sure to use the model and configuration file that match.
- - `--ckpt-path`: relative path (w.r.t `--experiment-dir`) to the checkpoint with a trained model,
+ - `--config` (optional): the path to the config file for the trained PoseNDF model.
+ Be sure to use the model and configuration files that match.
+ Default is `'config.yaml'`.
+ - `--ckpt-path`: relative path (w.r.t. experiment root directory which is specified in the config file) to the checkpoint with a trained model,
  - `--num-poses` (optional): how many poses should be generated.
  Default is one.
  - `--poses-file` (optional): the path (relative to the place the script is executed) to an `npz` file containing poses with initial, random values assigned to joints.
@@ -128,15 +127,15 @@ where:
  If the flag is missing nothing is saved.
         
 ### Pose interpolation
-    python -m experiments.interpolation --experiment-dir={}--config={} --ckpt-path={} --num-steps={} --step-size={} --poses_file={} --save-projection-steps
+    python -m experiments.interpolation --config={} --ckpt-path={} --num-steps={} --step-size={} --poses_file={} --save-projection-steps
 
 where:
 
- - `--experiment-dir`: directory where the checkpoint and config files are stored.
- The results, if appropriate flags are present, will also be saved under this directory.
- - `--config` (optional): relative path (w.r.t `--experiment-dir`) to the config file for the model.
- Be sure to use the model and configuration file that match.
- - `--ckpt-path`: relative path (w.r.t `--experiment-dir`) to the checkpoint with a trained model,
+
+ - `--config` (optional): the path to the config file for the trained PoseNDF model.
+ Be sure to use the model and configuration files that match.
+ Default is `'config.yaml'`.
+ - `--ckpt-path`: relative path (w.r.t. experiment root directory which is specified in the config file) to the checkpoint with a trained model,
  - `--num-steps` (optional): how many interpolation steps will be performed
  - `--step-size` (optional): what step size should be used.
  Default is 0.1.
