@@ -3,6 +3,7 @@
 import ipdb
 import torch
 import os
+from pytorch3d.io import save_obj
 from pytorch3d.renderer import (
     look_at_view_transform,
     FoVPerspectiveCameras, 
@@ -30,6 +31,10 @@ def quat_flip(pose_in):
     is_neg = pose_in[:,:,0] <0
     pose_in[is_neg] = (-1)*pose_in[is_neg]
     return pose_in, is_neg
+
+def save_meshes(vertices, faces, out_path, prefix='out'):
+    os.makedirs( os.path.join(out_path, 'meshes'), exist_ok=True)
+    [save_obj(os.path.join(out_path, 'meshes', '{}_{:04}.obj'.format(prefix,i) ), vertices[i], faces) for i in range(len(vertices))]
 
 def renderer(vertices, faces, out_path, device, prefix='out'):
     out_path = os.path.join(out_path, 'render')

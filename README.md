@@ -100,37 +100,51 @@ Pose-NDF is a continuous model for plausible human poses based on neural distanc
 
 ### Pose generation
 
-    python -m experiments.sample_poses --config={} --ckpt_path={} --noisy_pose={} --outpath_folder={}
+A pose is generated in two steps:
+
+1. Assign random values to joints
+2. Project the resulting pose onto the manifold
+
+You can generate random plausible poses with:
+
+    python -m experiments.sample_poses --config={} --ckpt-path={} --num-poses={} --poses-file={} --render --save-projection-steps
 
 where:
 
- - `config`: path to the config file for the model.
- Be sure to use the model and configuration file that match,
- - `ckpt_path`: path to the checkpoint with a trained model,
- - `noisy_pose`: is a path to an `npz` file containing random poses in quaternions,
-Examples of such files can be found in the training data.
- - `outpath_folder`: where to save rendered initial and projected pose images.
-
-outpath_folder: save rendered initial and projected pose.
+ - `--config` (optional): the path to the config file for the trained PoseNDF model.
+ Be sure to use the model and configuration files that match.
+ Default is `'config.yaml'`.
+ - `--ckpt-path`: relative path (w.r.t. experiment root directory which is specified in the config file) to the checkpoint with a trained model,
+ - `--num-poses` (optional): how many poses should be generated.
+ Default is one.
+ - `--poses-file` (optional): the path (relative to the place the script is executed) to an `npz` file containing poses with initial, random values assigned to joints.
+ The poses should be represented with quaternions.
+ Examples of such files can be found in the training data.
+ If no file is provided, joint values for each pose are initialized randomly.
+ - `--render` (optional): whether to render the initial random poses and the projected poses.
+ If the flag is missing nothing is rendered.
+ - `--save-projections-steps` (optional): whether to save an `.npz` file with poses obtained in each step of the projection algorithm.
+ If the flag is missing nothing is saved.
         
 ### Pose interpolation
-    python -m experiments.interpolation --config={} --ckpt_path={} --pose_file={}
+    python -m experiments.interpolation --config={} --ckpt-path={} --num-steps={} --step-size={} --poses_file={} --save-projection-steps
 
-where parameters are the same as in _Pose generation_ with `pose_file` parameter being the equivalent of `noisy_pose` (no idea why...)
+where:
 
-The `ipdb` package is used by this script.
-Basically:
- - type `n` and press `Enter` to execute the next line
- - or type `c` and press Enter to execute until the next breaking point
 
-More info how to use IPDB can be found [here](https://www.geeksforgeeks.org/using-ipdb-to-debug-python-code/) or [here](https://wangchuan.github.io/coding/2017/07/12/ipdb-cheat-sheet.html)
-
-TODO:
-1. Most likely we do not want to rely on IPDB.
-Not intuitive and badly documented.
-2. More importantly, I believe there is no code which actually performs pose interpolation.
-The `experiments/interpolation.py` script simply generates two poses and that's all.
-I'm pretty sure that nothing else happens, but I will confirm when I have a really good understanding of the code.
+ - `--config` (optional): the path to the config file for the trained PoseNDF model.
+ Be sure to use the model and configuration files that match.
+ Default is `'config.yaml'`.
+ - `--ckpt-path`: relative path (w.r.t. experiment root directory which is specified in the config file) to the checkpoint with a trained model,
+ - `--num-steps` (optional): how many interpolation steps will be performed
+ - `--step-size` (optional): what step size should be used.
+ Default is 0.1.
+ - `--poses-file` (optional): a path to an `npz` file containing poses (potentially with some noise).
+ - `--save-interpolation-steps` (optional): whether to save an `.npz` file with poses obtained in each step of the interpolation algorithm.
+ The poses should be represented with quaternions.
+ Examples of such files can be found in the training data.
+ The first and the last pose in the data are taken as the poses to interpolate between.
+ If no file with poses is provided, joint values for both the start and the end pose are initialized randomly.
 
 ### Motion denoising
 

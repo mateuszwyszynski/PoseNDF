@@ -20,7 +20,7 @@ import time
 from pathlib import Path
 from typing import List, Tuple
 
-from pytorch3d.transforms import axis_angle_to_quaternion
+from pytorch3d.transforms import axis_angle_to_quaternion, quaternion_to_axis_angle
 import numpy as onp
 import smplx
 import smplx.joint_names
@@ -149,12 +149,16 @@ def load_movement_data(path: Path) -> Tuple[onp.ndarray, int]:
         poses_key = 'poses'
         poses_start_ind = 3
         poses_end_ind = 66
+        poses = torch.from_numpy(motion_data[poses_key][:, poses_start_ind:poses_end_ind].astype('float32')).reshape(-1, 21, 3)
+        num_poses = poses.shape[0]
     else:
         poses_key = 'pose_body'
         poses_start_ind = 0
         poses_end_ind = 63
-    poses = torch.from_numpy(motion_data[poses_key][:, poses_start_ind:poses_end_ind].astype('float32')).reshape(-1, 21, 3)
-    num_poses = poses.shape[0]
+        quaternion_poses = torch.from_numpy(motion_data[poses_key])
+        num_poses = quaternion_poses.shape[0]
+        poses = onp.zeros((num_poses, 21, 3))
+        poses = quaternion_to_axis_angle(quaternion_poses)
     return poses, num_poses
 
 
