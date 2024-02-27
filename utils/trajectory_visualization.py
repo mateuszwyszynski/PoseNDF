@@ -22,6 +22,7 @@ from typing import List, Tuple
 
 from pytorch3d.transforms import axis_angle_to_quaternion, quaternion_to_axis_angle
 import numpy as onp
+import os
 import smplx
 import smplx.joint_names
 import smplx.lbs
@@ -36,7 +37,7 @@ def main(
     poses_path: Path,
     model_path: Path,
     config: Path,
-    checkpoint_path: Path,
+    ckpt_path: str = 'checkpoint_epoch_best.tar',
     model_type: Literal["smpl", "smplh", "smplx", "mano"] = "smplx",
     gender: Literal["male", "female", "neutral"] = "neutral",
     num_betas: int = 10,
@@ -62,7 +63,7 @@ def main(
     opt = load_config(config)
     posendf = PoseNDF(opt)
     device= 'cuda:0'
-    posendf.load_checkpoint_from_path(checkpoint_path, device=device, training=False)
+    posendf.load_checkpoint_from_path(os.path.join(posendf.experiment_dir, ckpt_path), device=device, training=False)
 
     poses, num_poses = load_movement_data(poses_path)
 

@@ -114,7 +114,7 @@ where:
  - `--config` (optional): the path to the config file for the trained PoseNDF model.
  Be sure to use the model and configuration files that match.
  Default is `'config.yaml'`.
- - `--ckpt-path`: relative path (w.r.t. experiment root directory which is specified in the config file) to the checkpoint with a trained model,
+ - `--ckpt-path` (optional): relative path (w.r.t. experiment root directory which is specified in the config file) to the checkpoint with a trained model,
  - `--num-poses` (optional): how many poses should be generated.
  Default is one.
  - `--poses-file` (optional): the path (relative to the place the script is executed) to an `npz` file containing poses with initial, random values assigned to joints.
@@ -198,7 +198,7 @@ Currently these are saved inside the current experiment directory inside the `pr
 With this file ready, you can run:
 
     python -m utils.trajecotry_visualization --model-path={} --poses-path={}
-    python -m utils.trajectory_visualization --model-path={} --poses-path={} --checkpoint-path={} --config={}
+    python -m utils.trajectory_visualization --model-path={} --poses-path={} --config={} --checkpoint-path={}
 
 where:
 
@@ -208,13 +208,13 @@ where:
  More on that in [this issue](https://github.com/mateuszwyszynski/PoseNDF/issues/8)
  - `--poses-path` is the path to the `npz` file with saved poses.
  E.g. `'posendf/version2/projection_steps/9.npz'`
- - `--checkpoint-path` is the path to the checkpoint with a PoseNDF model, i.e. the network approximating the UDF.
- E.g. `'posendf/replicate-version2/checkpoint_epoch_best.tar'`
  - `--config` is the path to the configuration file for the PoseNDF model.
  E.g. `'posendf/replicate-version2/config.yaml'`
+ - `--ckpt-path` (optional): relative path (w.r.t. experiment root directory which is specified in the config file) to the checkpoint with a trained model.
 
 Open the link presented by the CLI in a browser.
-You can play the animation in a loop, control the pose index with a slider or next / previous pose buttons.
+You can play the animation in a loop by selecting `Playing`.
+You can also control the pose index with a slider or the next / previous pose buttons.
 
 Note that there is a read only field which shows the distance to the manifold for the current pose.
 
