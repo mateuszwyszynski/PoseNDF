@@ -107,7 +107,7 @@ A pose is generated in two steps:
 
 You can generate random plausible poses with:
 
-    python -m experiments.sample_poses --config={} --ckpt-path={} --num-poses={} --poses-file={} --render --save-projection-steps
+    python -m experiments.sample_poses --config={} --ckpt-path={} --num-poses={} --poses-file={} --max-projection-distance={} --max-projection-steps={} --render --save-projection-steps
 
 where:
 
@@ -121,13 +121,18 @@ where:
  The poses should be represented with quaternions.
  Examples of such files can be found in the training data.
  If no file is provided, joint values for each pose are initialized randomly.
+ - `--max-projection-dist` (optional): the maximum accepted distance to the manifold for the final poses.
+ Default is 0.001.
+ - `--max-projection-steps` (optional): if specified, this is the maximum number of projection steps.
+ The projection algorithm will stop after specified number of iterations no matter what is the distance to the manifold for the resulting poses.
+ Default is `None` in which case the algorithm does not stop until all poses are within the specified `--max-projection-dist`.
  - `--render` (optional): whether to render the initial random poses and the projected poses.
  If the flag is missing nothing is rendered.
  - `--save-projections-steps` (optional): whether to save an `.npz` file with poses obtained in each step of the projection algorithm.
  If the flag is missing nothing is saved.
         
 ### Pose interpolation
-    python -m experiments.interpolation --config={} --ckpt-path={} --num-steps={} --step-size={} --poses_file={} --save-projection-steps
+    python -m experiments.interpolation --config={} --ckpt-path={} --poses_file={} --num-steps={} --step-size={} --max-projection-distance={} --max-projection-steps={} --save-interpolation-steps
 
 where:
 
@@ -135,16 +140,22 @@ where:
  - `--config` (optional): the path to the config file for the trained PoseNDF model.
  Be sure to use the model and configuration files that match.
  Default is `'config.yaml'`.
- - `--ckpt-path`: relative path (w.r.t. experiment root directory which is specified in the config file) to the checkpoint with a trained model,
- - `--num-steps` (optional): how many interpolation steps will be performed
- - `--step-size` (optional): what step size should be used.
- Default is 0.1.
+ - `--ckpt-path` (optional): relative path (w.r.t. experiment root directory which is specified in the config file) to the checkpoint with a trained model,
  - `--poses-file` (optional): a path to an `npz` file containing poses (potentially with some noise).
- - `--save-interpolation-steps` (optional): whether to save an `.npz` file with poses obtained in each step of the interpolation algorithm.
  The poses should be represented with quaternions.
  Examples of such files can be found in the training data.
  The first and the last pose in the data are taken as the poses to interpolate between.
  If no file with poses is provided, joint values for both the start and the end pose are initialized randomly.
+ - `--num-steps` (optional): how many interpolation steps will be performed
+ - `--step-size` (optional): what step size should be used.
+ Default is 0.1.
+  - `--max-projection-dist` (optional): the maximum accepted distance to the manifold for the final poses.
+ Default is 0.001.
+ - `--max-projection-steps` (optional): if specified, this is the maximum number of projection steps.
+ The projection algorithm will stop after specified number of iterations no matter what is the distance to the manifold for the resulting poses.
+ Default is `None` in which case the algorithm does not stop until all poses are within the specified `--max-projection-dist`.
+ - `--save-interpolation-steps` (optional): whether to save an `.npz` file with poses obtained in each step of the interpolation algorithm.
+ If the flag is missing nothing is saved.
 
 ### Motion denoising
 

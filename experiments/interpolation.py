@@ -15,7 +15,8 @@ import tyro
 
 def main(
         config: str = 'config.yaml', ckpt_path: str = 'checkpoint_epoch_best.tar', poses_file: str = None,
-        num_steps: int = 20, step_size: float = 0.1, save_interpolation_steps: bool = False
+        num_steps: int = 20, step_size: float = 0.1, max_projection_dist: float = 0.001,
+        max_projection_steps: int = None, save_interpolation_steps: bool = False
         ) -> None:
     opt = load_config(config)
     posendf = PoseNDF(opt)
@@ -33,10 +34,13 @@ def main(
     pose1 = torch.from_numpy(pose1.astype(np.float32)).unsqueeze(0)
     pose2 = torch.from_numpy(pose2.astype(np.float32)).unsqueeze(0)
 
-    pose1 = posendf.project(pose1.to(device))
-    pose2 = posendf.project(pose2.to(device))
+    pose1 = posendf.project(pose1.to(device), max_dist=max_projection_dist, max_steps=max_projection_steps)
+    pose2 = posendf.project(pose2.to(device), max_dist=max_projection_dist, max_steps=max_projection_steps)
 
-    posendf.interpolate(pose1, pose2, num_steps, step_size, save_interpolation_steps=save_interpolation_steps)
+    posendf.interpolate(
+        pose1, pose2, num_steps, step_size, max_projection_dist=max_projection_dist,
+        max_projection_steps=max_projection_steps, save_interpolation_steps=save_interpolation_steps
+        )
 
 
 if __name__ == '__main__':

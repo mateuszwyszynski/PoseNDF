@@ -119,7 +119,7 @@ class PoseNDF(torch.nn.Module):
         return poses
 
 
-    def project(self, poses, iterations=100, save_projection_steps=True):
+    def project(self, poses, max_dist=0.001, max_steps=None, save_projection_steps=False):
         poses, _ = quat_flip(poses)
         poses = torch.nn.functional.normalize(poses,dim=-1)
 
@@ -131,8 +131,16 @@ class PoseNDF(torch.nn.Module):
             batch_size, _, _ = poses.shape
             projection_steps = torch.detach(poses).reshape(batch_size, 1, -1, 4)
 
-        for _ in range(iterations):
+        net_pred = self(poses, train=False)
+        step = 0
+        while not max(net_pred['dist_pred']) < max_dist:
             poses = self.projection_step(poses)
+            net_pred = self(poses, train=False)
+
+            if max_steps is not None:
+                step += 1
+                if step > max_steps:
+                    break
 
             if save_projection_steps:
                 projection_steps = torch.cat((projection_steps, poses.reshape(batch_size, 1, -1, 4)), dim=1)
@@ -143,11 +151,13 @@ class PoseNDF(torch.nn.Module):
 
         return poses
 
-    def interpolate(self, start_pose, end_pose, num_iter=20, step_size=0.1, save_interpolation_steps=True):
+    def interpolate(
+            self, start_pose, end_pose, num_iter=20, step_size=0.1, max_projection_dist=0.001,
+            max_projection_steps=None, save_interpolation_steps=False):
         interpolation_steps = torch.detach(start_pose).reshape(1, -1, 4)
         for _ in range(num_iter):
             pose = (1-step_size)*start_pose + step_size*end_pose
-            start_pose = self.projection_step(pose)
+            start_pose = self.project(pose.detach(), max_dist=max_projection_dist, max_steps=max_projection_steps)
             interpolation_steps = torch.cat((interpolation_steps, start_pose.reshape(1, -1, 4)), dim=0)
 
         if save_interpolation_steps:
