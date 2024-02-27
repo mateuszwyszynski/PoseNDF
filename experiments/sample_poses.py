@@ -14,18 +14,18 @@ from model.posendf import PoseNDF
 
 def sample_poses(
         config: str = 'config.yaml', ckpt_path: str = 'checkpoint_epoch_best.tar',
-        num_poses: int = 1, poses_file: Path = None, max_projection_dist: float = 0.001,
+        num_poses: int = 1, poses_fpath: Path = None, max_projection_dist: float = 0.001,
         max_projection_steps: int = None, render: bool = False, save_projection_steps: bool = False
         ):
     opt = load_config(config)
     posendf = PoseNDF(opt)
     device= 'cuda:0'
     posendf.load_checkpoint_from_path(os.path.join(posendf.experiment_dir, ckpt_path), device=device, training=False)
-    if poses_file is None:
+    if poses_fpath is None:
         noisy_poses = torch.rand((num_poses,21,4))
         noisy_poses = torch.nn.functional.normalize(noisy_poses,dim=2).to(device=device)
     else:
-        noisy_poses = np.load(poses_file)['pose']
+        noisy_poses = np.load(poses_fpath)['pose']
         subsample_indices = np.random.randint(0, len(noisy_poses), num_poses)
         noisy_poses = noisy_poses[subsample_indices]
         noisy_poses = torch.from_numpy(noisy_poses.astype(np.float32)).to(device=device)

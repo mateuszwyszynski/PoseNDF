@@ -14,7 +14,7 @@ import tyro
 
 
 def main(
-        config: str = 'config.yaml', ckpt_path: str = 'checkpoint_epoch_best.tar', poses_file: str = None,
+        config: str = 'config.yaml', ckpt_path: str = 'checkpoint_epoch_best.tar', poses_fpath: str = None,
         num_steps: int = 20, step_size: float = 0.1, max_projection_dist: float = 0.001,
         max_projection_steps: int = None, save_interpolation_steps: bool = False
         ) -> None:
@@ -23,11 +23,11 @@ def main(
     device= 'cuda:0'
     posendf.load_checkpoint_from_path(os.path.join(posendf.experiment_dir, ckpt_path), device=device, training=False)
 
-    if poses_file is None:
+    if poses_fpath is None:
         pose1 = np.random.rand(21,4).astype(np.float32)
         pose2 = np.random.rand(21,4).astype(np.float32)
     else:
-        noisy_poses = np.load(poses_file)['pose']
+        noisy_poses = np.load(poses_fpath)['pose']
         start_ind = 0
         pose1 = noisy_poses[start_ind]
         pose2 = noisy_poses[len(noisy_poses)-1]
