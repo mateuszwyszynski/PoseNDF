@@ -107,7 +107,7 @@ A pose is generated in two steps:
 
 You can generate random plausible poses with:
 
-    python -m experiments.sample_poses --config={} --ckpt-path={} --num-poses={} --poses-file={} --max-projection-distance={} --max-projection-steps={} --render --save-projection-steps
+    python -m experiments.sample_poses --config={} --ckpt-path={} --num-poses={} --poses-fpath={} --max-projection-distance={} --max-projection-steps={} --render --save-projection-steps
 
 where:
 
@@ -117,7 +117,7 @@ where:
  - `--ckpt-path` (optional): relative path (w.r.t. experiment root directory which is specified in the config file) to the checkpoint with a trained model,
  - `--num-poses` (optional): how many poses should be generated.
  Default is one.
- - `--poses-file` (optional): the path (relative to the place the script is executed) to an `npz` file containing poses with initial, random values assigned to joints.
+ - `--poses-fpath` (optional): the path (relative to the place the script is executed) to an `npz` file containing poses with initial, random values assigned to joints.
  The poses should be represented with quaternions.
  Examples of such files can be found in the training data.
  If no file is provided, joint values for each pose are initialized randomly.
@@ -132,7 +132,7 @@ where:
  If the flag is missing nothing is saved.
         
 ### Pose interpolation
-    python -m experiments.interpolation --config={} --ckpt-path={} --poses_file={} --num-steps={} --step-size={} --max-projection-distance={} --max-projection-steps={} --save-interpolation-steps
+    python -m experiments.interpolation --config={} --ckpt-path={} --poses_fpath={} --num-steps={} --step-size={} --max-projection-distance={} --max-projection-steps={} --save-interpolation-steps
 
 where:
 
@@ -141,7 +141,7 @@ where:
  Be sure to use the model and configuration files that match.
  Default is `'config.yaml'`.
  - `--ckpt-path` (optional): relative path (w.r.t. experiment root directory which is specified in the config file) to the checkpoint with a trained model,
- - `--poses-file` (optional): a path to an `npz` file containing poses (potentially with some noise).
+ - `--poses-fpath` (optional): a path to an `npz` file containing poses (potentially with some noise).
  The poses should be represented with quaternions.
  Examples of such files can be found in the training data.
  The first and the last pose in the data are taken as the poses to interpolate between.
