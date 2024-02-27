@@ -14,7 +14,8 @@ from model.posendf import PoseNDF
 
 def sample_poses(
         config: str = 'config.yaml', ckpt_path: str = 'checkpoint_epoch_best.tar',
-        num_poses: int = 1, poses_file: Path = None, render: bool = False, save_projection_steps: bool = False
+        num_poses: int = 1, poses_file: Path = None, max_projection_dist: float = 0.001,
+        max_projection_steps: int = None, render: bool = False, save_projection_steps: bool = False
         ):
     opt = load_config(config)
     posendf = PoseNDF(opt)
@@ -39,7 +40,10 @@ def sample_poses(
         smpl_init = body_model(betas=betas, pose_body=noisy_poses_axis_angle.view(-1, 69))
         renderer(smpl_init.vertices, smpl_init.faces, posendf.experiment_dir, device=device, prefix='init')
 
-    projected_poses = posendf.project(noisy_poses, save_projection_steps=save_projection_steps)
+    projected_poses = posendf.project(
+        noisy_poses, max_dist=max_projection_dist, max_steps=max_projection_steps,
+        save_projection_steps=save_projection_steps
+        )
 
     # render final poses
     if render:
