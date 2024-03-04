@@ -1,3 +1,5 @@
+# %% This notebook uses Jupytext to store the notebook in .py format: https://github.com/mwouts/jupytext
+
 # %%
 import numpy as np
 from pathlib import Path
