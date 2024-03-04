@@ -21,7 +21,7 @@ from model.posendf import PoseNDF
 # %% Load poses
 poses_fpath_suffix = 'ACCAD/Female1General_c3d/A6- lift box t2_poses.npz'
 poses1_fpath = '../amass_raw/' + poses_fpath_suffix
-poses2_fpath = '../amass-disturbed/' + poses_fpath_suffix
+poses2_fpath = '../amass-perturbed/' + poses_fpath_suffix
 
 poses1 = np.load(poses1_fpath)['poses']
 poses2 = np.load(poses2_fpath)['poses']
@@ -52,18 +52,18 @@ upper_bounds = manifold_distances1 + distances
 lower_bounds = manifold_distances1 - distances
 
 # %% [markdown]
-# We expect that the distance to the manifold for the disturbed poses will change no more than the added disturbance
+# We expect that the distance to the manifold for the perturbed poses will change no more than the added perturbance
 
 # %% Plot distances
 import matplotlib.pyplot as plt
 
 plt.plot(manifold_distances1, 'bo', label='Raw poses to manifold')
-plt.plot(manifold_distances2, 'ro', markersize=3, label='Disturbed poses to manifold')
-plt.plot(upper_bounds, 'go', markersize=1, label='Disturbance bounds')
+plt.plot(manifold_distances2, 'ro', markersize=3, label='Perturbed poses to manifold')
+plt.plot(upper_bounds, 'go', markersize=1, label='Perturbance bounds')
 plt.plot(lower_bounds, 'go', markersize=1)
 plt.xlabel('Frame')
 plt.ylabel('Distance')
-plt.title('Distances between original and disturbed poses')
+plt.title('Distances between original and perturbed poses')
 plt.legend()
 plt.show()
 

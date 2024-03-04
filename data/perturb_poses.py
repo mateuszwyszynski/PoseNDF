@@ -5,9 +5,9 @@ import torch
 import tyro
 
 
-def disturb_poses(poses_fpath: str, noise_magnitude: float = 0.01, out_dir: str = 'amass-disturbed'):
+def perturb_poses(poses_fpath: str, noise_magnitude: float = 0.01, out_dir: str = 'amass-perturbed'):
     """
-    Disturb poses from a file by adding noise to the values on joints.
+    Perturb poses from a file by adding noise to the values on joints.
     """
     data = np.load(poses_fpath)
     poses = data['poses']
@@ -29,4 +29,4 @@ def disturb_poses(poses_fpath: str, noise_magnitude: float = 0.01, out_dir: str 
 
 
 if __name__ == "__main__":
-    tyro.cli(disturb_poses)
+    tyro.cli(perturb_poses)
