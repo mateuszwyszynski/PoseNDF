@@ -68,7 +68,9 @@ plt.legend()
 plt.show()
 
 # %% Incorrect cases - when we exceed the upper bound
-manifold_distances2[(manifold_distances2 - upper_bounds) > 0.0]
+dist_to_upper_bound = manifold_distances2 - upper_bounds
+dist_to_upper_bound[dist_to_upper_bound > 0.0]
 
 # %% Incorrect cases - when we fall below the lower bound
-manifold_distances2[(lower_bounds - manifold_distances2) > 0.0]
+dist_to_lower_bound = lower_bounds - manifold_distances2
+dist_to_lower_bound[dist_to_lower_bound > 0.0]
