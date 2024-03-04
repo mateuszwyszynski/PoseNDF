@@ -48,3 +48,15 @@ class geo():
         geo_val, geo_idx = torch.topk(geo_dis, k=5, largest=False)
 
         return geo_val, geo_idx
+
+def pose_distance(poses1: torch.Tensor, poses2: torch.Tensor):
+    """
+    Compute the distance between two sets of poses.
+    The metric used in SO(3) is the one from eq. 20 in https://www.cs.cmu.edu/~cga/dynopt/readings/Rmetric.pdf
+    Since we are using mean, the weights for each joint are the same and equal to 1/21.
+
+    Args:
+        poses1: A tensor of shape (N, 21, 4) representing the first set of poses.
+        poses2: A tensor of shape (N, 21, 4) representing the second set of poses.
+    """
+    return torch.mean(1 - torch.abs(torch.sum(poses1*poses2, dim=-1)), dim=-1)
