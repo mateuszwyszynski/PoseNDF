@@ -48,6 +48,9 @@ manifold_distances2 = posendf(body_quats2, train=False)['dist_pred'].reshape(-1)
 upper_bounds = manifold_distances1 + distances
 lower_bounds = manifold_distances1 - distances
 
+# %% [markdown]
+# We expect that the distance to the manifold for the disturbed poses will change no more than the added disturbance
+
 # %% Plot distances
 import matplotlib.pyplot as plt
 
