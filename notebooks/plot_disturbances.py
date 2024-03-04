@@ -17,8 +17,9 @@ from data.dist_utils import pose_distance
 from model.posendf import PoseNDF
 
 # %% Load poses
-poses1_fpath = '../amass_raw/ACCAD/Female1General_c3d/A6- lift box t2_poses.npz'
-poses2_fpath = '../amass-disturbed/ACCAD/Female1General_c3d/A6- lift box t2_poses.npz'
+poses_fpath_suffix = 'ACCAD/Female1General_c3d/A6- lift box t2_poses.npz'
+poses1_fpath = '../amass_raw/' + poses_fpath_suffix
+poses2_fpath = '../amass-disturbed/' + poses_fpath_suffix
 
 poses1 = np.load(poses1_fpath)['poses']
 poses2 = np.load(poses2_fpath)['poses']
@@ -63,3 +64,9 @@ plt.ylabel('Distance')
 plt.title('Distances between original and disturbed poses')
 plt.legend()
 plt.show()
+
+# %% Incorrect cases - when we exceed the upper bound
+manifold_distances2[(manifold_distances2 - upper_bounds) > 0.0]
+
+# %% Incorrect cases - when we fall below the lower bound
+manifold_distances2[(lower_bounds - manifold_distances2) > 0.0]
