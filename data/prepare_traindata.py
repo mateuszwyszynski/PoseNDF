@@ -8,9 +8,9 @@ import ipdb
 from data_splits import amass_splits
 import argparse
 import torch
-from create_data import PoseData, quat_doublecover, quat_flip, axis_angle_to_quaternion_np, AmassData
+from create_data import PoseData, quat_flip, AmassData
 import faiss
-from pytorch3d.transforms import axis_angle_to_quaternion, quaternion_to_axis_angle
+from pytorch3d.transforms import axis_angle_to_quaternion
 import faiss.contrib.torch_utils
 import dist_utils
 import smplx
