@@ -90,40 +90,6 @@ def faiss_idx_np(amass_datas, root_dir,  device='cuda:0'):
     return  index, None, all_pose
 
 
-
-def faiss_idx_torch(amass_datas, root_dir):
-    """not used"""
-    all_pose = []
-    for amass_data in amass_datas:
-        ds_dir = os.path.join(root_dir,amass_data)
-        seqs = sorted(os.listdir(ds_dir))
-
-        for seq in seqs:
-            if not 'npz' in seq:
-                continue
-            # data = np.memmap(os.path.join(ds_dir, seq))
-            # tmp+= data.size
-            # print('cumulative....', tmp)
-            data_val = np.load(os.path.join(ds_dir, seq))['pose_body']
-            pose_pt = torch.from_numpy(data_val.reshape(len(data_val), 21, 3))
-            # data_val = axis_angle_to_quaternion(pose_pt).detach().numpy()
-            data_val = axis_angle_to_quaternion(pose_pt)
-            # Todo: add  double cover
-            #change data to quaternion
-
-            all_pose.extend(data_val.reshape(len(data_val), 84).unsqueeze(0))
-    # print('total size....', tmp)
-    print('total data szie......', len(all_pose))
-
-    data_all = torch.cat(all_pose).to(device='cuda')
-    res = faiss.StandardGpuResources()
-    nlist = 10000   #Todo chnage this number, I think more is faster
-    # index = faiss.GpuIndexIVFFlat(res, 84, nlist, faiss.METRIC_L2)
-    index = faiss.GpuIndexFlatL2(res, 84)
-    index.train(data_all)
-    index.add(data_all)
-
-    return  index,data_all
 def main(args):
 
     device ='cuda'
