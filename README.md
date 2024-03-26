@@ -42,7 +42,18 @@ TODO:
 Why the following sentence was here in the original repo?
  - You just need to convert .pt file to .npz file.
 
-#### 2.2 Create a script for generating training data:
+#### 2.2 Create training data
+
+In this step random noise is added to poses that were obtained in the previous step.
+This happens inside the `PoseData` class in the `data.create_data` script.
+Noise is added only to a selected subset of indices: `indices = np.random.randint(0, len(quat_pose), num)`.
+The noise is added with: `sampled_pose = sampled_pose + self.sigma[i]*np.random.rand(21,4)`
+
+To generate data run:
+
+    python -m data.generate_traindata
+
+#### DEPRECATED 2.2 Create a script for generating training data:
 
 In this step a bash script `train_data.sh` for training data generation is created in the project root directory.
 
@@ -60,7 +71,7 @@ TODO:
 Deal with these instructions about using slurm:
  - If you are using slurm then add "--use_slurm" and change the path on environment and machine specs in L24:L30 in data/prepare_data.py
 
-#### 2.3 Create  training data :
+#### DEPRECATED 2.3 Create  training data :
 Run the bash script (if needed change to your shell):
 
     bash train_data.sh
