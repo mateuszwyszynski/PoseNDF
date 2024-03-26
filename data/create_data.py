@@ -7,7 +7,7 @@ import numpy as np
 import pytorch3d
 import faiss
 import ipdb
-from data_splits import amass_splits
+from data.data_splits import amass_splits
 
 from torch.utils.data import Dataset
 import os
