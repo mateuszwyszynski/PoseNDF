@@ -99,7 +99,6 @@ def main(args):
         print('Missing sequence file.....', seq_file)
         return
 
-    os.makedirs(os.path.join(args.out_dir, args.seq_file.split('/')[0]),exist_ok=True)
     out_dsdir = os.path.join(args.out_dir, args.seq_file.split('/')[0])
     os.makedirs(out_dsdir,exist_ok=True)
 
