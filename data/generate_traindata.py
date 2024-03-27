@@ -10,25 +10,26 @@ from data.data_splits import amass_splits
 import data.dist_utils as dist_utils
 
 
-def faiss_idx_np(amass_datasets, root_dir):
+def load_npz_files(data_dir):
+    """
+    Load all npz files in the given directory and merge them into a single numpy array.
+    """
     all_pose = []
+    for root, _, files in os.walk(data_dir):
+        for file in files:
+            if file.endswith('.npz'):
+                pose_seq = np.load(os.path.join(root, file))['pose_body'][:, :63]
+                pose_seq = torch.from_numpy(pose_seq.reshape(len(pose_seq), 21, 3))
+                pose_seq = axis_angle_to_quaternion(pose_seq).detach().numpy()
+                pose_seq, _ = quat_flip(pose_seq)
 
-    for amass_dataset in amass_datasets:
-        current_dataset_dir = os.path.join(root_dir,amass_dataset)
-        seqs = sorted(os.listdir(current_dataset_dir))
-        print(amass_dataset, len(seqs))
+                all_pose.extend(pose_seq)
+
+    return np.array(all_pose)
 
 
-        for seq in seqs:
-            if not 'npz' in seq:
-                continue
-            pose_seq = np.load(os.path.join(current_dataset_dir, seq))['pose_body'][:, :63]
-            pose_seq = torch.from_numpy(pose_seq.reshape(len(pose_seq), 21, 3))
-            pose_seq = axis_angle_to_quaternion(pose_seq).detach().numpy()
-            pose_seq, _ = quat_flip(pose_seq)  
-
-            all_pose.extend(pose_seq.reshape(len(pose_seq), 84))
-    all_pose = np.array(all_pose)
+def faiss_idx_np(root_dir):
+    all_pose = load_npz_files(root_dir).reshape(-1, 84)
 
     index = faiss.index_factory(84, "Flat")
     index.train(all_pose)
@@ -42,7 +43,7 @@ def main(
         k_faiss: int = 50, k_dist: int = 5, data_type: str = 'np'
         ):
     amass_datasets = sorted(amass_splits['train'])
-    faiss_model, _, all_pose = faiss_idx_np(amass_datasets, samples_on_manifold_path)
+    faiss_model, _, all_pose = faiss_idx_np(samples_on_manifold_path)
 
     for amass_dataset in amass_datasets:
         current_dataset_dir = os.path.join(samples_on_manifold_path, amass_dataset)
